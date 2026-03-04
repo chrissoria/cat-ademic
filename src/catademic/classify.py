@@ -112,7 +112,6 @@ def classify(
     models=None,
     consensus_threshold: Union[str, float] = "unanimous",
     # Parameters previously only on classify_ensemble
-    description: str = "",
     use_json_schema: bool = True,
     max_workers: int = None,
     fail_strategy: str = "partial",
@@ -186,7 +185,6 @@ def classify(
             - "majority": 50% agreement
             - "two-thirds": 67% agreement
             - float: Custom threshold between 0 and 1
-        description (str): Optional context about the data (used when categories="auto").
         use_json_schema (bool): Use JSON schema for structured output. Default True.
         max_workers (int): Max parallel workers for API calls. None = auto.
         fail_strategy (str): How to handle failures - "partial" (default) or "strict".
@@ -488,7 +486,10 @@ def classify(
             fail_strategy=fail_strategy,
         )
 
-    return classify_ensemble(
+    # When using an academic source, capture the result so we can attach metadata
+    # and rename columns before saving. Pass filename=None to suppress internal save.
+    _academic = _papers_df is not None
+    result = classify_ensemble(
         survey_input=input_data,
         categories=categories,
         models=models,
@@ -522,16 +523,29 @@ def classify(
         categories_per_chunk=categories_per_chunk,
         divisions=divisions,
         research_question=research_question,
-        filename=filename,
-        save_directory=save_directory,
+        filename=None if _academic else filename,
+        save_directory=None if _academic else save_directory,
         progress_callback=progress_callback,
     )
 
-    # Attach paper metadata columns to the result when journal_issn was used
-    if _papers_df is not None:
-        meta_cols = [c for c in _papers_df.columns if c != "text"]
+    # Attach paper metadata and rename survey_input → abstract
+    if _academic:
         result = result.reset_index(drop=True)
+        if "survey_input" in result.columns:
+            result = result.rename(columns={"survey_input": "abstract"})
+        meta_cols = [c for c in _papers_df.columns if c != "text"]
         for col in meta_cols:
-            result[col] = _papers_df[col].values
+            result[col] = _papers_df[col].reset_index(drop=True)
+        # Save with enriched columns if filename was requested
+        if filename or save_directory:
+            import os as _os
+            out = filename
+            if save_directory and filename:
+                out = _os.path.join(save_directory, _os.path.basename(filename))
+            elif save_directory:
+                out = _os.path.join(save_directory, "results.csv")
+            if out:
+                result.to_csv(out, index=False)
+                print(f"Combined results saved to {out}")
 
     return result

@@ -72,7 +72,7 @@ def extract(
             - raw_top_text: Raw model output from final merge step
 
     Examples:
-        >>> import catllm as cat
+        >>> import catademic as cat
         >>>
         >>> # Extract categories from survey responses
         >>> results = cat.extract(
@@ -235,7 +235,7 @@ def summarize(
             - page_index: Page number, 0-indexed (PDF mode only)
 
     Examples:
-        >>> import catllm as cat
+        >>> import catademic as cat
         >>>
         >>> # Single model text summarization
         >>> results = cat.summarize(

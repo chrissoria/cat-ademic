@@ -1,5 +1,5 @@
 """
-Async batch inference for CatLLM.
+Async batch inference for CatAdemic.
 
 Supports OpenAI, Anthropic, Google, Mistral, and xAI — all offer 50% cost
 savings and higher rate limits compared to synchronous API calls.

@@ -1,5 +1,5 @@
 """
-Summarization functions for CatLLM.
+Summarization functions for CatAdemic.
 
 This module provides unified summarization for text and PDF inputs,
 supporting both single-model and multi-model (ensemble) summarization.
@@ -87,7 +87,7 @@ def summarize(
             - page_index: Page number, 0-indexed (PDF mode only)
 
     Examples:
-        >>> import catllm as cat
+        >>> import catademic as cat
         >>>
         >>> # Single model text summarization
         >>> results = cat.summarize(

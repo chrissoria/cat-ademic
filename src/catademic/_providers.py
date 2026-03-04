@@ -1,5 +1,5 @@
 """
-Unified LLM provider infrastructure for CatLLM.
+Unified LLM provider infrastructure for CatAdemic.
 
 This module provides a unified HTTP-based approach for calling multiple LLM providers
 (OpenAI, Anthropic, Google, Mistral, xAI, Perplexity, HuggingFace, and Ollama)

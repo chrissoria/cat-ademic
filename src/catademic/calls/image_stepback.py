@@ -22,7 +22,7 @@ def get_image_stepback_insight_openai(
     """
     # Determine the base URL based on model source
     if model_source == "huggingface":
-        from catllm._providers import _detect_huggingface_endpoint
+        from catademic._providers import _detect_huggingface_endpoint
         base_url = _detect_huggingface_endpoint(api_key, user_model)
     elif model_source == "huggingface-together":
         base_url = "https://router.huggingface.co/together/v1"

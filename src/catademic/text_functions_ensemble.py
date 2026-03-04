@@ -1,5 +1,5 @@
 """
-Ensemble text classification functions for CatLLM.
+Ensemble text classification functions for CatAdemic.
 
 This module provides multi-model ensemble classification using parallel execution.
 Multiple LLM models are called simultaneously and results are combined using
@@ -2866,7 +2866,7 @@ def summarize_ensemble(
         - page_index: Page number, 0-indexed (PDF mode only)
 
     Examples:
-        >>> import catllm as cat
+        >>> import catademic as cat
         >>>
         >>> # Single model text summarization
         >>> results = cat.summarize(

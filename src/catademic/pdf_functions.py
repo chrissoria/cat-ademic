@@ -260,7 +260,7 @@ def pdf_multi_class(
             - processing_status: "success" or "error"
 
     Example:
-        >>> import catllm as cat
+        >>> import catademic as cat
         >>> # Image mode (default) - good for documents with charts/tables
         >>> results = cat.pdf_multi_class(
         ...     pdf_description="financial reports",
@@ -279,11 +279,11 @@ def pdf_multi_class(
         ... )
 
     .. deprecated::
-        Use :func:`catllm.classify` instead. This function will be removed in a future version.
+        Use :func:`catademic.classify` instead. This function will be removed in a future version.
     """
     warnings.warn(
         "pdf_multi_class() is deprecated and will be removed in a future version. "
-        "Use catllm.classify() instead, which auto-detects PDF input.",
+        "Use catademic.classify() instead, which auto-detects PDF input.",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -543,7 +543,7 @@ Provide the final categorization in the same JSON format:"""
 
         # Determine the base URL based on model source
         if model_source == "huggingface":
-            from catllm.text_functions import _detect_huggingface_endpoint
+            from catademic.text_functions import _detect_huggingface_endpoint
             base_url = _detect_huggingface_endpoint(api_key, user_model)
         elif model_source == "huggingface-together":
             base_url = "https://router.huggingface.co/together/v1"
@@ -869,7 +869,7 @@ Provide the final categorization in the same JSON format:"""
 
         # Determine the base URL based on model source
         if model_source == "huggingface":
-            from catllm.text_functions import _detect_huggingface_endpoint
+            from catademic.text_functions import _detect_huggingface_endpoint
             base_url = _detect_huggingface_endpoint(api_key, user_model)
         elif model_source == "huggingface-together":
             base_url = "https://router.huggingface.co/together/v1"
@@ -1424,7 +1424,7 @@ def explore_pdf_categories(
     if model_source in ["openai", "huggingface", "huggingface-together", "xai", "perplexity"]:
         # Determine base URL for OpenAI-compatible APIs
         if model_source == "huggingface":
-            from catllm.text_functions import _detect_huggingface_endpoint
+            from catademic.text_functions import _detect_huggingface_endpoint
             openai_base_url = _detect_huggingface_endpoint(api_key, user_model)
         elif model_source == "huggingface-together":
             openai_base_url = "https://router.huggingface.co/together/v1"

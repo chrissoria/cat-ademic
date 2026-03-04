@@ -1,10 +1,13 @@
 """
-Category extraction functions for CatLLM.
+Category extraction functions for CatAdemic.
 
-This module provides unified category extraction from text, image, and PDF inputs.
+This module provides unified category extraction from text, image, and PDF inputs,
+with built-in support for fetching academic paper abstracts from OpenAlex.
 """
 
 import warnings
+
+from ._academic import fetch_academic_papers, SUPPORTED_SOURCES
 
 __all__ = [
     # Main entry point
@@ -37,10 +40,40 @@ from .pdf_functions import (
 )
 
 
+def _build_academic_context(journal, field, research_focus, paper_metadata):
+    """Build a context block string from academic paper metadata fields."""
+    parts = []
+    if journal:
+        parts.append(f"Journal: {journal}")
+    if field:
+        parts.append(f"Field: {field}")
+    if research_focus:
+        parts.append(f"Research focus: {research_focus}")
+    if paper_metadata:
+        for k, v in paper_metadata.items():
+            parts.append(f"{k.capitalize()}: {v}")
+    return "\n".join(parts)
+
+
 def extract(
-    input_data,
-    api_key,
+    input_data=None,
+    api_key=None,
     input_type="text",
+    # Academic source — when set, input_data is fetched automatically
+    journal_issn: str = None,
+    journal_name: str = None,
+    journal_field: str = None,
+    topic_name: str = None,
+    topic_id: str = None,
+    paper_limit: int = 50,
+    date_from: str = None,
+    date_to: str = None,
+    polite_email: str = None,
+    # Academic context fields — injected into the extraction prompt
+    journal: str = None,
+    field: str = None,
+    research_focus: str = None,
+    paper_metadata: dict = None,
     description="",
     max_categories=12,
     categories_per_chunk=10,
@@ -59,7 +92,7 @@ def extract(
     chunk_delay: float = 0.0,
 ):
     """
-    Unified category extraction function for text, image, and PDF inputs.
+    Unified category extraction function for text, image, PDF, and academic inputs.
 
     This function dispatches to the appropriate specialized explore function
     based on the `input_type` parameter, providing a single entry point for
@@ -70,11 +103,22 @@ def extract(
             - For text: list of text responses or pandas Series
             - For image: directory path, single file, or list of image paths
             - For pdf: directory path, single file, or list of PDF paths
+            - Omit when using journal_issn (abstracts are fetched automatically).
         api_key (str): API key for the model provider.
         input_type (str): Type of input data. Options:
             - "text" (default): Text/survey responses
             - "image": Image files
             - "pdf": PDF documents
+        journal_issn (str): Journal ISSN to pull abstracts from via OpenAlex
+            (e.g. "0894-4393"). When set, input_data is fetched automatically.
+        paper_limit (int): Number of papers to fetch. Default 50.
+        date_from (str): Optional start date filter as "YYYY-MM-DD".
+        date_to (str): Optional end date filter as "YYYY-MM-DD".
+        journal (str): Journal name — injected into the extraction prompt as context.
+        field (str): Academic field/discipline (e.g. "computational social science").
+        research_focus (str): Optional research focus string (e.g. "survey methods").
+        paper_metadata (dict): Additional context injected into the prompt
+            (e.g. {"cited_by_count": "varies", "keywords": "see abstracts"}).
         description (str): Description of the input data. Used as:
             - survey_question for text
             - image_description for images
@@ -110,21 +154,21 @@ def extract(
             - raw_top_text: Raw model output from final merge step
 
     Examples:
-        >>> import catllm as cat
+        >>> import catademic as cat
         >>>
-        >>> # Extract categories from survey responses
+        >>> # Extract categories from OpenAlex journal abstracts
         >>> results = cat.extract(
-        ...     input_data=df['responses'],
-        ...     description="Why did you move?",
+        ...     journal_issn="0894-4393",
+        ...     paper_limit=50,
+        ...     description="Academic papers from Social Science Computer Review",
         ...     api_key="your-api-key"
         ... )
         >>> print(results['top_categories'])
         >>>
-        >>> # Extract categories from images
+        >>> # Extract categories from text responses
         >>> results = cat.extract(
-        ...     input_data="/path/to/images/",
-        ...     description="Product photos",
-        ...     input_type="image",
+        ...     input_data=df['responses'],
+        ...     description="Why did you move?",
         ...     api_key="your-api-key"
         ... )
         >>>
@@ -137,6 +181,34 @@ def extract(
         ...     api_key="your-api-key"
         ... )
     """
+    # Early validation
+    if api_key is None:
+        raise ValueError(
+            "[CatAdemic] api_key is required. Pass api_key='sk-...'."
+        )
+
+    # Fetch abstracts from OpenAlex when journal_issn is set
+    if journal_issn is not None or journal_name is not None or journal_field is not None or topic_name is not None or topic_id is not None:
+        if input_data is not None:
+            raise ValueError("Pass either input_data or a journal/field source, not both.")
+        _papers_df = fetch_academic_papers(
+            journal_issn=journal_issn, journal_name=journal_name, journal_field=journal_field,
+            topic_name=topic_name, topic_id=topic_id,
+            limit=paper_limit, date_from=date_from, date_to=date_to,
+            polite_email=polite_email,
+        )
+        input_data = _papers_df["text"].tolist()
+        print(f"[CatAdemic] Fetched {len(input_data)} paper abstracts.")
+    elif input_data is None:
+        raise ValueError(
+            "Provide either input_data, journal_issn, or journal_name."
+        )
+
+    # Prepend academic context to description if any fields provided
+    academic_context = _build_academic_context(journal, field, research_focus, paper_metadata)
+    if academic_context:
+        description = f"{academic_context}\n{description}".strip() if description else academic_context
+
     input_type = input_type.lower().rstrip('s')  # Normalize: "texts" -> "text", "images" -> "image", "pdfs" -> "pdf"
 
     if input_type == "text":

@@ -103,11 +103,11 @@ def image_multi_class(
     Classify images using LLMs.
 
     .. deprecated::
-        Use :func:`catllm.classify` instead. This function will be removed in a future version.
+        Use :func:`catademic.classify` instead. This function will be removed in a future version.
     """
     warnings.warn(
         "image_multi_class() is deprecated and will be removed in a future version. "
-        "Use catllm.classify() instead, which auto-detects image input.",
+        "Use catademic.classify() instead, which auto-detects image input.",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -318,7 +318,7 @@ Provide the final categorization in the same JSON format:"""
 
         # Determine the base URL based on model source
         if model_source == "huggingface":
-            from catllm.text_functions import _detect_huggingface_endpoint
+            from catademic.text_functions import _detect_huggingface_endpoint
             base_url = _detect_huggingface_endpoint(api_key, user_model)
         elif model_source == "huggingface-together":
             base_url = "https://router.huggingface.co/together/v1"
@@ -1555,7 +1555,7 @@ def explore_image_categories(
 
     # Determine base URL for OpenAI-compatible providers
     if model_source == "huggingface":
-        from catllm.text_functions import _detect_huggingface_endpoint
+        from catademic.text_functions import _detect_huggingface_endpoint
         openai_base_url = _detect_huggingface_endpoint(api_key, user_model)
     elif model_source == "huggingface-together":
         openai_base_url = "https://router.huggingface.co/together/v1"

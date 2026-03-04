@@ -1,12 +1,14 @@
 """
-Classification functions for CatLLM.
+Classification functions for CatAdemic.
 
-This module provides unified classification for text, image, and PDF inputs,
-supporting both single-model and multi-model (ensemble) classification.
+This module provides unified classification for text, image, PDF, and academic
+paper inputs, supporting both single-model and multi-model (ensemble) classification.
 """
 
 import warnings
 from typing import Union, Callable
+
+from ._academic import fetch_academic_papers, SUPPORTED_SOURCES
 
 __all__ = [
     # Main entry point
@@ -39,11 +41,41 @@ from .image_functions import image_multi_class
 from .pdf_functions import pdf_multi_class
 
 
+def _build_academic_context(journal, field, research_focus, paper_metadata):
+    """Build a context block string from academic paper metadata fields."""
+    parts = []
+    if journal:
+        parts.append(f"Journal: {journal}")
+    if field:
+        parts.append(f"Field: {field}")
+    if research_focus:
+        parts.append(f"Research focus: {research_focus}")
+    if paper_metadata:
+        for k, v in paper_metadata.items():
+            parts.append(f"{k.capitalize()}: {v}")
+    return "\n".join(parts)
+
+
 def classify(
-    input_data,
     categories,
+    input_data=None,
     api_key=None,
     input_type="text",
+    # Academic source — when set, input_data is fetched automatically
+    journal_issn: str = None,
+    journal_name: str = None,
+    journal_field: str = None,
+    topic_name: str = None,
+    topic_id: str = None,
+    paper_limit: int = 50,
+    date_from: str = None,
+    date_to: str = None,
+    polite_email: str = None,
+    # Academic context fields — injected into the classification prompt
+    journal: str = None,
+    field: str = None,
+    research_focus: str = None,
+    paper_metadata: dict = None,
     description="",
     user_model="gpt-4o",
     mode="image",
@@ -104,8 +136,18 @@ def classify(
             - For text: list of text responses or pandas Series
             - For image: directory path or list of image file paths
             - For pdf: directory path or list of PDF file paths
+            - Omit when using journal_issn (abstracts are fetched automatically).
         categories (list): List of category names for classification.
         api_key (str): API key for the model provider (single-model mode).
+        journal_issn (str): Journal ISSN to pull abstracts from via OpenAlex
+            (e.g. "0894-4393"). When set, input_data is fetched automatically.
+        paper_limit (int): Number of papers to fetch. Default 50.
+        date_from (str): Optional start date filter as "YYYY-MM-DD".
+        date_to (str): Optional end date filter as "YYYY-MM-DD".
+        journal (str): Journal name — injected into the prompt as context.
+        field (str): Academic field/discipline (e.g. "computational social science").
+        research_focus (str): Optional research focus string.
+        paper_metadata (dict): Additional context injected into the prompt.
         input_type (str): DEPRECATED - input type is now auto-detected.
             Kept for backward compatibility.
         description (str): Description of the input data context.
@@ -172,7 +214,7 @@ def classify(
         pd.DataFrame: Results with classification columns.
 
     Examples:
-        >>> import catllm as cat
+        >>> import catademic as cat
         >>>
         >>> # Single model classification
         >>> results = cat.classify(
@@ -193,6 +235,36 @@ def classify(
         ...     consensus_threshold="unanimous",  # or "majority", "two-thirds", or 0.75
         ... )
     """
+    # Early validation
+    if api_key is None and models is None:
+        raise ValueError(
+            "[CatAdemic] api_key is required. Pass api_key='sk-...' or use the "
+            "models= parameter for multi-model mode."
+        )
+
+    # Fetch abstracts from OpenAlex when journal_issn is set
+    _papers_df = None
+    if journal_issn is not None or journal_name is not None or journal_field is not None or topic_name is not None or topic_id is not None:
+        if input_data is not None:
+            raise ValueError("Pass either input_data or a journal/field source, not both.")
+        _papers_df = fetch_academic_papers(
+            journal_issn=journal_issn, journal_name=journal_name, journal_field=journal_field,
+            topic_name=topic_name, topic_id=topic_id,
+            limit=paper_limit, date_from=date_from, date_to=date_to,
+            polite_email=polite_email,
+        )
+        input_data = _papers_df["text"].tolist()
+        print(f"[CatAdemic] Fetched {len(input_data)} paper abstracts.")
+    elif input_data is None:
+        raise ValueError(
+            f"Provide either input_data, journal_issn, or journal_name."
+        )
+
+    # Prepend academic context to description if any fields provided
+    academic_context = _build_academic_context(journal, field, research_focus, paper_metadata)
+    if academic_context:
+        description = f"{academic_context}\n{description}".strip() if description else academic_context
+
     # Build models list
     if models is None:
         # Single model mode - build models list from individual params
@@ -203,7 +275,7 @@ def classify(
         if not has_other_category(categories):
             if add_other == "prompt":
                 print(
-                    "\n[CatLLM] It looks like your categories may not include a catch-all\n"
+                    "\n[CatAdemic] It looks like your categories may not include a catch-all\n"
                     "  'Other' option. Adding one can improve accuracy by giving the\n"
                     "  model an outlet for ambiguous responses instead of forcing them\n"
                     "  into ill-fitting categories.\n"
@@ -222,7 +294,7 @@ def classify(
                 # add_other=True — silently add
                 categories = list(categories) + ["Other"]
                 print(
-                    f"[CatLLM] Auto-added 'Other' catch-all category. "
+                    f"[CatAdemic] Auto-added 'Other' catch-all category. "
                     f"Categories are now: {categories}  "
                     f"(set add_other=False to disable)"
                 )
@@ -250,7 +322,7 @@ def classify(
                     missing_ex = [r for r in lacking if not r["has_examples"]]
 
                     print(
-                        "\n[CatLLM] Category verbosity check (set check_verbosity=False to skip):"
+                        "\n[CatAdemic] Category verbosity check (set check_verbosity=False to skip):"
                     )
                     for r in lacking:
                         issues = []
@@ -283,7 +355,7 @@ def classify(
 
     if chain_of_verification:
         _strategy_warnings.append(
-            "[CatLLM] WARNING: chain_of_verification=True is enabled.\n"
+            "[CatAdemic] WARNING: chain_of_verification=True is enabled.\n"
             "  Empirical evidence shows CoVe DEGRADES accuracy by ~2 pp and\n"
             "  sensitivity by up to 12 pp for structured classification tasks.\n"
             "  The verification step causes models to retract correct classifications.\n"
@@ -296,7 +368,7 @@ def classify(
     n_examples = sum(1 for ex in examples if ex is not None)
     if n_examples > 0:
         _strategy_warnings.append(
-            f"[CatLLM] NOTE: {n_examples} few-shot example(s) provided.\n"
+            f"[CatAdemic] NOTE: {n_examples} few-shot example(s) provided.\n"
             "  Empirical evidence shows few-shot examples DEGRADE accuracy by\n"
             "  ~1.1-1.2 pp on average. Examples encourage over-classification\n"
             "  (sensitivity up, but precision drops ~2-3 pp), amplifying false\n"
@@ -306,7 +378,7 @@ def classify(
 
     if thinking_budget and thinking_budget > 0:
         _strategy_warnings.append(
-            f"[CatLLM] NOTE: thinking_budget={thinking_budget} is enabled.\n"
+            f"[CatAdemic] NOTE: thinking_budget={thinking_budget} is enabled.\n"
             "  Empirical evidence shows reasoning/thinking modes produce negligible\n"
             "  accuracy gains (<1 pp) for classification tasks, while significantly\n"
             "  increasing latency, token usage, and failure rates (up to 40% timeouts\n"
@@ -316,7 +388,7 @@ def classify(
 
     if chain_of_thought:
         _strategy_warnings.append(
-            "[CatLLM] NOTE: chain_of_thought=True is enabled.\n"
+            "[CatAdemic] NOTE: chain_of_thought=True is enabled.\n"
             "  Empirical evidence shows CoT has no measurable effect on structured\n"
             "  classification accuracy (~0 pp change). When categories are well-defined\n"
             "  with verbose descriptions, explicit reasoning steps add no value.\n"
@@ -325,7 +397,7 @@ def classify(
 
     if step_back_prompt:
         _strategy_warnings.append(
-            "[CatLLM] NOTE: step_back_prompt=True is enabled.\n"
+            "[CatAdemic] NOTE: step_back_prompt=True is enabled.\n"
             "  Empirical evidence shows step-back prompting produces small, inconsistent\n"
             "  gains (+0.6 pp average) and actually degrades top-tier model performance.\n"
             "  Cost: ~2x API calls per response."
@@ -374,7 +446,7 @@ def classify(
         # Warn if progress_callback was provided (incompatible with batch)
         if progress_callback is not None:
             print(
-                "[CatLLM] WARNING: progress_callback is not available in batch_mode "
+                "[CatAdemic] WARNING: progress_callback is not available in batch_mode "
                 "(no per-item progress until the job completes). Ignoring callback."
             )
 
@@ -454,3 +526,12 @@ def classify(
         save_directory=save_directory,
         progress_callback=progress_callback,
     )
+
+    # Attach paper metadata columns to the result when journal_issn was used
+    if _papers_df is not None:
+        meta_cols = [c for c in _papers_df.columns if c != "text"]
+        result = result.reset_index(drop=True)
+        for col in meta_cols:
+            result[col] = _papers_df[col].values
+
+    return result

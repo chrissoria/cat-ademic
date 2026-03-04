@@ -1,5 +1,5 @@
 """
-Shared utilities for CatLLM.
+Shared utilities for CatAdemic.
 
 This module provides utility functions for JSON handling, file loading,
 encoding, and other common operations used across the package.

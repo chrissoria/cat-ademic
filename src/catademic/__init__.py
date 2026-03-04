@@ -25,6 +25,11 @@ from .summarize import summarize
 from ._category_analysis import has_other_category, check_category_verbosity
 
 # =============================================================================
+# Academic data source
+# =============================================================================
+from ._academic import fetch_academic_papers, find_journal, find_journals_by_field, find_topic, SUPPORTED_SOURCES
+
+# =============================================================================
 # Provider utilities (for advanced users)
 # =============================================================================
 from ._batch import BatchJobExpiredError, BatchJobFailedError
@@ -89,6 +94,12 @@ __all__ = [
     # Batch mode exceptions
     "BatchJobExpiredError",
     "BatchJobFailedError",
+    # Academic data source
+    "fetch_academic_papers",
+    "find_journal",
+    "find_journals_by_field",
+    "find_topic",
+    "SUPPORTED_SOURCES",
     # Main entry points
     "extract",
     "explore",

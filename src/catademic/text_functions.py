@@ -1,5 +1,5 @@
 """
-Text classification functions for CatLLM.
+Text classification functions for CatAdemic.
 
 This module provides multi-class text classification using a unified HTTP-based approach
 that works with multiple LLM providers (OpenAI, Anthropic, Google, Mistral, xAI,
@@ -853,11 +853,11 @@ def multi_class(
         )
 
     .. deprecated::
-        Use :func:`catllm.classify` instead. This function will be removed in a future version.
+        Use :func:`catademic.classify` instead. This function will be removed in a future version.
     """
     warnings.warn(
         "multi_class() is deprecated and will be removed in a future version. "
-        "Use catllm.classify() instead, which supports single and multi-model classification.",
+        "Use catademic.classify() instead, which supports single and multi-model classification.",
         DeprecationWarning,
         stacklevel=2,
     )

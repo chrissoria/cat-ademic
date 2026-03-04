@@ -12,11 +12,11 @@ import sys
 import os
 
 # Add the src directory to path so we import from local code, not installed package
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
-# Remove any cached catllm modules to ensure we load from local
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+# Remove any cached catademic modules to ensure we load from local
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
@@ -26,11 +26,11 @@ import time
 import json
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
-from catllm.text_functions_ensemble import multi_class_ensemble
-import catllm
+from catademic.text_functions_ensemble import multi_class_ensemble
+import catademic
 
 # Load API keys from .env files (try both locations)
-load_dotenv('/Users/chrissoria/Documents/Research/cat-llm/.env')
+load_dotenv('/Users/chrissoria/Documents/Research/cat-ademic/.env')
 load_dotenv('/Users/chrissoria/Documents/Research/Categorization_AI_experiments/.env')
 
 # Get API keys
@@ -40,8 +40,8 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 mistral_api_key = os.getenv("MISTRAL_API_KEY")
 xai_api_key = os.getenv("XAI_API_KEY")
 
-print(f"Testing local catllm version: {catllm.__version__}")
-print(f"Loaded from: {catllm.__file__}")
+print(f"Testing local catademic version: {catademic.__version__}")
+print(f"Loaded from: {catademic.__file__}")
 print()
 
 # Verify keys loaded
@@ -251,7 +251,7 @@ def save_results(result: dict, combined_df: pd.DataFrame, timestamp: str):
             }
         json.dump({
             "timestamp": datetime.now().isoformat(),
-            "catllm_version": catllm.__version__,
+            "catademic_version": catademic.__version__,
             "test_responses": TEST_RESPONSES,
             "test_categories": TEST_CATEGORIES,
             "result": result_copy,

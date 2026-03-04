@@ -9,7 +9,7 @@ import pandas as pd
 
 src_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src')
 sys.path.insert(0, os.path.abspath(src_path))
-for mod in [k for k in sys.modules if k.startswith('catllm')]:
+for mod in [k for k in sys.modules if k.startswith('catademic')]:
     del sys.modules[mod]
 
 from dotenv import load_dotenv
@@ -21,7 +21,7 @@ for p in [
     if os.path.isfile(p):
         load_dotenv(p, override=True)
 
-from catllm import classify
+from catademic import classify
 
 api_keys = {
     "openai": os.getenv("OPENAI_API_KEY"),

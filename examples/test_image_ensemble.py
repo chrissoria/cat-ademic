@@ -9,30 +9,30 @@ import sys
 import os
 
 # Add the src directory to path so we import from local code, not installed package
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
-# Remove any cached catllm modules to ensure we load from local
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+# Remove any cached catademic modules to ensure we load from local
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
 import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
-from catllm.text_functions_ensemble import multi_class_ensemble
-import catllm
+from catademic.text_functions_ensemble import multi_class_ensemble
+import catademic
 
 # Load API keys from .env files
-load_dotenv('/Users/chrissoria/Documents/Research/cat-llm/.env')
+load_dotenv('/Users/chrissoria/Documents/Research/cat-ademic/.env')
 load_dotenv('/Users/chrissoria/Documents/Research/Categorization_AI_experiments/.env')
 
 # Get API keys
 openai_api_key = os.getenv("OPENAI_API_KEY")
 anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 
-print(f"Testing local catllm version: {catllm.__version__}")
-print(f"Loaded from: {catllm.__file__}")
+print(f"Testing local catademic version: {catademic.__version__}")
+print(f"Loaded from: {catademic.__file__}")
 print()
 
 # Verify keys loaded
@@ -43,9 +43,9 @@ print()
 
 # Test images
 TEST_IMAGES = [
-    "/Users/chrissoria/Documents/Research/cat-llm/tests/9924971435_3ac76eed4f_c.jpg",
-    "/Users/chrissoria/Documents/Research/cat-llm/tests/9688423031_065013996f_c.jpg",
-    "/Users/chrissoria/Documents/Research/cat-llm/tests/9688419667_16c304583c_c.jpg",
+    "/Users/chrissoria/Documents/Research/cat-ademic/tests/9924971435_3ac76eed4f_c.jpg",
+    "/Users/chrissoria/Documents/Research/cat-ademic/tests/9688423031_065013996f_c.jpg",
+    "/Users/chrissoria/Documents/Research/cat-ademic/tests/9688419667_16c304583c_c.jpg",
 ]
 
 # Categories for image classification
@@ -213,7 +213,7 @@ def test_directory_input():
         return None
 
     # Use the tests directory containing the images
-    test_dir = "/Users/chrissoria/Documents/Research/cat-llm/tests"
+    test_dir = "/Users/chrissoria/Documents/Research/cat-ademic/tests"
 
     print(f"Input directory: {test_dir}")
     print(f"\nCategories ({len(TEST_CATEGORIES)}):")

@@ -112,7 +112,7 @@ def classify(
     models=None,
     consensus_threshold: Union[str, float] = "unanimous",
     # Parameters previously only on classify_ensemble
-    survey_question: str = "",
+    description: str = "",
     use_json_schema: bool = True,
     max_workers: int = None,
     fail_strategy: str = "partial",
@@ -186,7 +186,7 @@ def classify(
             - "majority": 50% agreement
             - "two-thirds": 67% agreement
             - float: Custom threshold between 0 and 1
-        survey_question (str): The survey question (used when categories="auto").
+        description (str): Optional context about the data (used when categories="auto").
         use_json_schema (bool): Use JSON schema for structured output. Default True.
         max_workers (int): Max parallel workers for API calls. None = auto.
         fail_strategy (str): How to handle failures - "partial" (default) or "strict".
@@ -452,7 +452,7 @@ def classify(
 
         # Build prompt components (mirrors what classify_ensemble does)
         categories_str = "\n".join(f"{i + 1}. {cat}" for i, cat in enumerate(categories))
-        survey_question_context = f"A respondent was asked: {survey_question}." if survey_question else ""
+        survey_question_context = f"Context: {description}." if description else ""
         examples = [example1, example2, example3, example4, example5, example6]
         examples_text = "\n".join(
             f"Example {i}: {ex}" for i, ex in enumerate(examples, 1) if ex is not None
@@ -493,7 +493,7 @@ def classify(
         categories=categories,
         models=models,
         input_description=description,
-        survey_question=survey_question,
+        survey_question=description,
         pdf_mode=pdf_mode,
         pdf_dpi=pdf_dpi,
         creativity=creativity,

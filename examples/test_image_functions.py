@@ -12,11 +12,11 @@ import sys
 import os
 
 # Add the src directory to path so we import from local code
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
 # Clear any cached modules
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
@@ -47,7 +47,7 @@ for provider, key in api_keys.items():
 print()
 
 # Create test image if it doesn't exist
-test_image = "/Users/chrissoria/Documents/Research/cat-llm/tests/test_image.png"
+test_image = "/Users/chrissoria/Documents/Research/cat-ademic/tests/test_image.png"
 if not os.path.exists(test_image):
     try:
         from PIL import Image, ImageDraw
@@ -65,7 +65,7 @@ print(f"Test image: {test_image}")
 print()
 
 # Import the functions
-from catllm.image_functions import explore_image_categories, image_multi_class, image_features
+from catademic.image_functions import explore_image_categories, image_multi_class, image_features
 
 # Vision-capable models for each provider
 vision_models = {

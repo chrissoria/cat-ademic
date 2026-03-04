@@ -9,11 +9,11 @@ import sys
 import os
 
 # Add the src directory to path so we import from local code
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
 # Clear any cached modules
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
@@ -46,7 +46,7 @@ for provider, key in api_keys.items():
 print()
 
 # Import the client
-from catllm.text_functions import UnifiedLLMClient
+from catademic.text_functions import UnifiedLLMClient
 
 # Test configurations for each provider
 # Using small/fast models to minimize cost and time

@@ -12,11 +12,11 @@ import sys
 import os
 
 # Add the src directory to path so we import from local code, not installed package
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
-# Remove any cached catllm modules to ensure we load from local
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+# Remove any cached catademic modules to ensure we load from local
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
@@ -26,13 +26,13 @@ import time
 import json
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
-from catllm.text_functions import multi_class, detect_provider
-import catllm
+from catademic.text_functions import multi_class, detect_provider
+import catademic
 
 # Load API keys from .env file
 os.chdir('/Users/chrissoria/Documents/Research/Categorization_AI_experiments')
 _ = load_dotenv(find_dotenv())
-os.chdir('/Users/chrissoria/Documents/Research/cat-llm')
+os.chdir('/Users/chrissoria/Documents/Research/cat-ademic')
 
 # Get API keys
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -43,8 +43,8 @@ xai_api_key = os.getenv("XAI_API_KEY")
 huggingface_api_key = os.getenv("HUGGINGFACE_API_KEY")
 perplexity_api_key = os.getenv("PERPLEXITY_API_KEY")
 
-print(f"Testing local catllm version: {catllm.__version__}")
-print(f"Loaded from: {catllm.__file__}")
+print(f"Testing local catademic version: {catademic.__version__}")
+print(f"Loaded from: {catademic.__file__}")
 print()
 
 # Verify keys loaded
@@ -288,7 +288,7 @@ def save_results(results: list, timestamp: str):
     with open(json_path, 'w') as f:
         json.dump({
             "timestamp": datetime.now().isoformat(),
-            "catllm_version": catllm.__version__,
+            "catademic_version": catademic.__version__,
             "test_responses": TEST_RESPONSES,
             "test_categories": TEST_CATEGORIES,
             "results": results,

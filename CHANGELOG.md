@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to CatLLM will be documented in this file.
+All notable changes to CatAdemic will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `CERAD_functions.py`: Refactored `cerad_drawn_score()` to call `classify()` directly instead of the deprecated `image_multi_class()`. All scoring logic unchanged.
+
+---
+
+## [3.0.0] - 2026-03-04
+
+### Changed — Package rename: cat-llm → cat-ademic
+
+This release forks the package from `cat-llm` and repurposes it for academic research.
+The core classification, extraction, and exploration engines are unchanged.
+
+- **Package renamed** from `cat-llm` / `catllm` to `cat-ademic` / `catademic`. Update all imports: `import catademic as cat`.
+- **Source directory** renamed from `src/catllm/` to `src/catademic/`.
+- **`classify()` parameter**: `survey_question` renamed to `description` — consistent with `extract()` and `explore()`. The internal prompt context phrase has also been updated from "A respondent was asked: ..." to "Context: ...".
+- **`ARCHITECTURE.md`**: Updated all `catllm`/`cat-llm` references to `catademic`/`cat-ademic`.
+- **`examples/`**: All example scripts updated to `import catademic`.
+
+### Added — OpenAlex academic data source
+
+- **`_academic.py`**: New module replacing `_social_media.py`. Fetches paper abstracts from the OpenAlex API for use as input to `classify()`, `extract()`, and `explore()`.
+  - `fetch_academic_papers(journal_issn, journal_name, journal_field, topic_name, topic_id, limit, date_from, date_to, polite_email)` — returns a DataFrame with 31 columns including abstract text, DOI, authors, citations, topics, keywords, and more.
+  - `find_journal(name)` — search OpenAlex for journals by name; prints top match and alternatives so users don't need to know ISSNs.
+  - `find_journals_by_field(field)` — search for journals by field name (current implementation uses name search; see `JOURNAL_DATASET_PLAN.md` for planned improvement).
+  - `find_topic(name)` — search OpenAlex concepts/topics by name, returns ID for use with `topic_id` parameter.
+- **Academic source parameters** added to `classify()`, `extract()`, and `explore()`:
+  - `journal_issn` — fetch papers from a specific journal by ISSN
+  - `journal_name` — fetch papers by journal name (resolved via `find_journal()`)
+  - `journal_field` — fetch papers across journals matching a field name
+  - `topic_name` / `topic_id` — filter papers by article content topic
+  - `paper_limit` — number of papers to fetch (default 50)
+  - `date_from` / `date_to` — date range filter (`"YYYY-MM-DD"`)
+  - `polite_email` — passed to OpenAlex Polite Pool for better rate limits
+- **`JOURNAL_DATASET_PLAN.md`**: Roadmap for building an empirical field → journal lookup table by pulling the full OpenAlex journal catalogue (~250k), LLM-classifying by field, and publishing as a HuggingFace dataset bundled into the package.
 
 ---
 
@@ -22,14 +54,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Returns the same simplified DataFrame format as synchronous single-model mode: `category_1`, `category_2`, ... columns with no model suffix, consensus, or agreement columns.
 - **`BatchJobExpiredError`**: New exception raised when a batch job expires or is cancelled. Includes the job ID for provider dashboard lookup.
 - **`BatchJobFailedError`**: New exception raised when a batch job terminates in a failed state.
-- **`src/catllm/_batch.py`**: New internal module implementing all batch logic (JSONL building, file upload, job creation, polling, result download and parsing) for all five supported providers via pure HTTP — no provider SDKs required.
+- **`src/catademic/_batch.py`**: New internal module implementing all batch logic (JSONL building, file upload, job creation, polling, result download and parsing) for all five supported providers via pure HTTP — no provider SDKs required.
 
 ---
 
 ## [2.5.0] - 2026-02-26
 
 ### Added
-- **`has_other_category()` utility**: New function in `catllm._category_analysis` that detects whether a category list contains a catch-all / "Other" category. Uses a two-tier heuristic (anchored patterns for exact matches, phrase patterns for short categories) with an optional LLM fallback for ambiguous cases.
+- **`has_other_category()` utility**: New function in `catademic._category_analysis` that detects whether a category list contains a catch-all / "Other" category. Uses a two-tier heuristic (anchored patterns for exact matches, phrase patterns for short categories) with an optional LLM fallback for ambiguous cases.
 - **`add_other` parameter in `classify()`**: Automatically detects when categories lack a catch-all "Other" option and prompts the user to add one. Supports three modes: `"prompt"` (default, interactive), `True` (silent), `False` (disabled). Including an "Other" category improves accuracy by giving models an outlet for ambiguous responses.
 - **`check_category_verbosity()` utility**: New function that uses a single LLM call to assess whether each category has a description and examples. Returns per-category flags (`has_description`, `has_examples`, `is_verbose`).
 - **`check_verbosity` parameter in `classify()`**: Alerts users when categories lack descriptions or examples (1 API call). Verbose categories with descriptions and examples improve accuracy by ~7 pp over bare labels. Default `True`.
@@ -363,7 +395,7 @@ Most code will work without changes. Key differences:
 - UCNets example usage documentation
 
 ### Changed
-- Package can now be imported as `catllm` instead of `cat_llm`
+- Package can now be imported as `catademic` instead of `cat_llm`
 
 ---
 
@@ -419,25 +451,25 @@ Most code will work without changes. Key differences:
 
 ---
 
-[2.3.3]: https://github.com/chrissoria/cat-llm/compare/v2.3.2...v2.3.3
-[2.3.2]: https://github.com/chrissoria/cat-llm/compare/v2.3.1...v2.3.2
-[2.3.1]: https://github.com/chrissoria/cat-llm/compare/v2.3.0...v2.3.1
-[2.3.0]: https://github.com/chrissoria/cat-llm/compare/v2.2.0...v2.3.0
-[2.2.0]: https://github.com/chrissoria/cat-llm/compare/v2.0.0...v2.2.0
-[2.0.0]: https://github.com/chrissoria/cat-llm/compare/v0.1.15...v2.0.0
-[0.1.15]: https://github.com/chrissoria/cat-llm/compare/v0.1.14...v0.1.15
-[0.1.14]: https://github.com/chrissoria/cat-llm/compare/v0.1.13...v0.1.14
-[0.1.13]: https://github.com/chrissoria/cat-llm/compare/v0.1.12...v0.1.13
-[0.1.12]: https://github.com/chrissoria/cat-llm/compare/v0.1.11...v0.1.12
-[0.1.11]: https://github.com/chrissoria/cat-llm/compare/v0.1.10...v0.1.11
-[0.1.10]: https://github.com/chrissoria/cat-llm/compare/v0.1.9...v0.1.10
-[0.1.9]: https://github.com/chrissoria/cat-llm/compare/v0.1.8...v0.1.9
-[0.1.8]: https://github.com/chrissoria/cat-llm/compare/v0.1.7...v0.1.8
-[0.1.7]: https://github.com/chrissoria/cat-llm/compare/v0.1.6...v0.1.7
-[0.1.6]: https://github.com/chrissoria/cat-llm/compare/v0.1.5...v0.1.6
-[0.1.5]: https://github.com/chrissoria/cat-llm/compare/v0.1.4...v0.1.5
-[0.1.4]: https://github.com/chrissoria/cat-llm/compare/v0.1.3...v0.1.4
-[0.1.3]: https://github.com/chrissoria/cat-llm/compare/v0.1.2...v0.1.3
-[0.1.2]: https://github.com/chrissoria/cat-llm/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/chrissoria/cat-llm/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/chrissoria/cat-llm/releases/tag/v0.1.0
+[2.3.3]: https://github.com/chrissoria/cat-ademic/compare/v2.3.2...v2.3.3
+[2.3.2]: https://github.com/chrissoria/cat-ademic/compare/v2.3.1...v2.3.2
+[2.3.1]: https://github.com/chrissoria/cat-ademic/compare/v2.3.0...v2.3.1
+[2.3.0]: https://github.com/chrissoria/cat-ademic/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/chrissoria/cat-ademic/compare/v2.0.0...v2.2.0
+[2.0.0]: https://github.com/chrissoria/cat-ademic/compare/v0.1.15...v2.0.0
+[0.1.15]: https://github.com/chrissoria/cat-ademic/compare/v0.1.14...v0.1.15
+[0.1.14]: https://github.com/chrissoria/cat-ademic/compare/v0.1.13...v0.1.14
+[0.1.13]: https://github.com/chrissoria/cat-ademic/compare/v0.1.12...v0.1.13
+[0.1.12]: https://github.com/chrissoria/cat-ademic/compare/v0.1.11...v0.1.12
+[0.1.11]: https://github.com/chrissoria/cat-ademic/compare/v0.1.10...v0.1.11
+[0.1.10]: https://github.com/chrissoria/cat-ademic/compare/v0.1.9...v0.1.10
+[0.1.9]: https://github.com/chrissoria/cat-ademic/compare/v0.1.8...v0.1.9
+[0.1.8]: https://github.com/chrissoria/cat-ademic/compare/v0.1.7...v0.1.8
+[0.1.7]: https://github.com/chrissoria/cat-ademic/compare/v0.1.6...v0.1.7
+[0.1.6]: https://github.com/chrissoria/cat-ademic/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/chrissoria/cat-ademic/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/chrissoria/cat-ademic/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/chrissoria/cat-ademic/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/chrissoria/cat-ademic/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/chrissoria/cat-ademic/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/chrissoria/cat-ademic/releases/tag/v0.1.0

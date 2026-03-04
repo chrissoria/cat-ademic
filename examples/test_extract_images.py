@@ -7,11 +7,11 @@ import sys
 import os
 
 # Add the src directory to path
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
 # Clear cached modules
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
@@ -31,7 +31,7 @@ print("Test: extract() with input_type='image'")
 print("=" * 70)
 
 # Create test image if needed
-test_image = "/Users/chrissoria/Documents/Research/cat-llm/tests/test_image.png"
+test_image = "/Users/chrissoria/Documents/Research/cat-ademic/tests/test_image.png"
 if not os.path.exists(test_image):
     from PIL import Image, ImageDraw
     img = Image.new('RGB', (200, 200), color='white')
@@ -43,7 +43,7 @@ if not os.path.exists(test_image):
     print(f"Created test image: {test_image}")
 
 # Import the extract function
-from catllm import extract
+from catademic import extract
 
 # Vision-capable models
 vision_models = {

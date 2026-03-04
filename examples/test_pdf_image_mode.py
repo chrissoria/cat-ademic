@@ -8,11 +8,11 @@ import sys
 import os
 
 # Add the src directory to path so we import from local code
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
 # Clear any cached modules
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
@@ -45,12 +45,12 @@ for provider, key in api_keys.items():
 print()
 
 # Test PDF file
-test_pdf = "/Users/chrissoria/Documents/Research/cat-llm/tests/title_page.pdf"
+test_pdf = "/Users/chrissoria/Documents/Research/cat-ademic/tests/title_page.pdf"
 print(f"Test PDF: {test_pdf}")
 print()
 
 # Import the function
-from catllm.pdf_functions import explore_pdf_categories
+from catademic.pdf_functions import explore_pdf_categories
 
 # Vision-capable models for image mode
 # Anthropic and Google will use native PDF, others convert to image

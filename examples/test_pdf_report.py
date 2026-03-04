@@ -46,11 +46,11 @@ pdf_path = generate_methodology_report_pdf(
     success_rate=100.0,
     result_df=df_ensemble,
     processing_time=53.0,
-    catllm_version="2.1.0",
+    catademic_version="2.1.0",
     python_version="3.11",
     classify_mode="Ensemble",
     models_list=models_list,
-    code="# example code\nimport catllm\nresult = catllm.classify(...)",
+    code="# example code\nimport catademic\nresult = catademic.classify(...)",
     consensus_threshold=0.5,
 )
 # Copy to test_output
@@ -81,11 +81,11 @@ pdf_path2 = generate_methodology_report_pdf(
     success_rate=100.0,
     result_df=df_comparison,
     processing_time=7.8,
-    catllm_version="2.1.0",
+    catademic_version="2.1.0",
     python_version="3.11",
     classify_mode="Model Comparison",
     models_list=comp_models,
-    code="# example code\nimport catllm\nresult = catllm.classify(...)",
+    code="# example code\nimport catademic\nresult = catademic.classify(...)",
 )
 dest2 = os.path.join(output_dir, 'test_comparison_report.pdf')
 shutil.copy(pdf_path2, dest2)
@@ -108,10 +108,10 @@ pdf_path3 = generate_methodology_report_pdf(
     success_rate=100.0,
     result_df=df_single,
     processing_time=1.7,
-    catllm_version="2.1.0",
+    catademic_version="2.1.0",
     python_version="3.11",
     classify_mode="Single Model",
-    code="# example code\nimport catllm\nresult = catllm.classify(...)",
+    code="# example code\nimport catademic\nresult = catademic.classify(...)",
 )
 dest3 = os.path.join(output_dir, 'test_single_report.pdf')
 shutil.copy(pdf_path3, dest3)

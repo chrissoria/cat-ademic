@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Test script for catllm.extract() function across all supported models.
+Test script for catademic.extract() function across all supported models.
 
 This script tests the extract function with the 'focus' parameter
 across all LLM providers supported by CatLLM.
@@ -12,11 +12,11 @@ import sys
 import os
 
 # Add the src directory to path so we import from local code, not installed package
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
-# Remove any cached catllm modules to ensure we load from local
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+# Remove any cached catademic modules to ensure we load from local
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
@@ -26,9 +26,9 @@ import time
 import json
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
-from catllm import extract
-from catllm.text_functions import detect_provider
-import catllm
+from catademic import extract
+from catademic.text_functions import detect_provider
+import catademic
 
 # Load API keys from .env file
 load_dotenv('/Users/chrissoria/Documents/Research/Categorization_AI_experiments/.env')
@@ -42,8 +42,8 @@ xai_api_key = os.getenv("XAI_API_KEY")
 huggingface_api_key = os.getenv("HUGGINGFACE_API_KEY")
 perplexity_api_key = os.getenv("PERPLEXITY_API_KEY")
 
-print(f"Testing local catllm version: {catllm.__version__}")
-print(f"Loaded from: {catllm.__file__}")
+print(f"Testing local catademic version: {catademic.__version__}")
+print(f"Loaded from: {catademic.__file__}")
 print()
 
 # Verify keys loaded
@@ -255,7 +255,7 @@ def save_results(results: list, timestamp: str):
     with open(json_path, 'w') as f:
         json.dump({
             "timestamp": datetime.now().isoformat(),
-            "catllm_version": catllm.__version__,
+            "catademic_version": catademic.__version__,
             "test_survey_question": TEST_SURVEY_QUESTION,
             "test_focus": TEST_FOCUS,
             "num_test_responses": len(TEST_RESPONSES),
@@ -269,7 +269,7 @@ def save_results(results: list, timestamp: str):
 # =============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(description="Test catllm.extract() function across all providers")
+    parser = argparse.ArgumentParser(description="Test catademic.extract() function across all providers")
     parser.add_argument("--model", type=str, help="Test a specific model only")
     parser.add_argument("--provider", type=str, help="Test a specific provider only")
     parser.add_argument("--no-focus", action="store_true", help="Test without the focus parameter")

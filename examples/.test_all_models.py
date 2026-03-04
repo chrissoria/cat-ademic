@@ -55,7 +55,7 @@ def load_env_file(env_path: Path) -> dict:
 # Load env vars at module level
 ENV_VARS = load_env_file(ENV_FILE)
 
-from catllm.text_functions import multi_class, detect_provider, UnifiedLLMClient
+from catademic.text_functions import multi_class, detect_provider, UnifiedLLMClient
 
 # =============================================================================
 # Model Configuration (mirrors hf_space/app.py)

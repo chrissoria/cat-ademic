@@ -9,11 +9,11 @@ import sys
 import os
 
 # Add the src directory to path so we import from local code
-src_path = '/Users/chrissoria/Documents/Research/cat-llm/src'
+src_path = '/Users/chrissoria/Documents/Research/cat-ademic/src'
 sys.path.insert(0, src_path)
 
 # Clear any cached modules
-modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catllm')]
+modules_to_remove = [key for key in sys.modules.keys() if key.startswith('catademic')]
 for mod in modules_to_remove:
     del sys.modules[mod]
 
@@ -49,7 +49,7 @@ print()
 # First, let's check for any test images in the tests directory
 test_image = None
 for ext in ['png', 'jpg', 'jpeg']:
-    potential_path = f"/Users/chrissoria/Documents/Research/cat-llm/tests/test_image.{ext}"
+    potential_path = f"/Users/chrissoria/Documents/Research/cat-ademic/tests/test_image.{ext}"
     if os.path.exists(potential_path):
         test_image = potential_path
         break
@@ -59,7 +59,7 @@ if test_image is None:
     # Create a simple test image
     try:
         from PIL import Image, ImageDraw
-        test_image = "/Users/chrissoria/Documents/Research/cat-llm/tests/test_image.png"
+        test_image = "/Users/chrissoria/Documents/Research/cat-ademic/tests/test_image.png"
         img = Image.new('RGB', (200, 200), color='white')
         draw = ImageDraw.Draw(img)
         draw.rectangle([20, 20, 180, 180], outline='blue', width=3)
@@ -75,7 +75,7 @@ print(f"Test image: {test_image}")
 print()
 
 # Import the function
-from catllm.image_functions import explore_image_categories
+from catademic.image_functions import explore_image_categories
 
 # Test configurations for each provider
 # Using small/fast models and image mode to minimize cost and time

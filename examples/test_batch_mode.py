@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Test script for batch_mode=True in catllm.classify().
+Test script for batch_mode=True in catademic.classify().
 
 Tests:
   1. Smoke test per supported provider (5 rows each)
@@ -21,7 +21,7 @@ import sys
 src_path = os.path.join(os.path.dirname(__file__), '..', 'src')
 sys.path.insert(0, os.path.abspath(src_path))
 
-modules_to_remove = [k for k in sys.modules if k.startswith('catllm')]
+modules_to_remove = [k for k in sys.modules if k.startswith('catademic')]
 for m in modules_to_remove:
     del sys.modules[m]
 
@@ -29,7 +29,7 @@ from dotenv import load_dotenv
 load_dotenv('/Users/chrissoria/Documents/Research/Categorization_AI_experiments/.env', override=True)
 
 import pandas as pd
-import catllm
+import catademic
 
 # =============================================================================
 # Config
@@ -129,7 +129,7 @@ def test_provider(provider_name):
     print(f"\n  Provider: {provider_name} | Model: {model}")
     print(f"  Items: {len(SAMPLE_TEXTS)}")
 
-    result = catllm.classify(
+    result = catademic.classify(
         input_data=SAMPLE_TEXTS,
         categories=CATEGORIES,
         description=DESCRIPTION,
@@ -173,10 +173,10 @@ def test_format_parity(provider_name="openai"):
     )
 
     print(f"\n  Running synchronous path...")
-    sync_df = catllm.classify(**common_kwargs, batch_mode=False)
+    sync_df = catademic.classify(**common_kwargs, batch_mode=False)
 
     print(f"\n  Running batch path...")
-    batch_df = catllm.classify(**common_kwargs, batch_mode=True, batch_poll_interval=10.0)
+    batch_df = catademic.classify(**common_kwargs, batch_mode=True, batch_poll_interval=10.0)
 
     print(f"\n  Sync columns:  {list(sync_df.columns)}")
     print(f"  Batch columns: {list(batch_df.columns)}")
@@ -207,7 +207,7 @@ def test_guards():
 
     # Guard 1: multi-model ensemble
     try:
-        catllm.classify(
+        catademic.classify(
             input_data=SAMPLE_TEXTS,
             categories=CATEGORIES,
             models=[
@@ -225,7 +225,7 @@ def test_guards():
 
     # Guard 2: unsupported provider
     try:
-        catllm.classify(
+        catademic.classify(
             input_data=SAMPLE_TEXTS,
             categories=CATEGORIES,
             user_model="Qwen/Qwen3-VL-235B-A22B-Instruct",
@@ -256,7 +256,7 @@ def test_partial_failures(provider_name="openai"):
 
     items_with_empty = SAMPLE_TEXTS[:3] + ["", None]
 
-    result = catllm.classify(
+    result = catademic.classify(
         input_data=items_with_empty,
         categories=CATEGORIES,
         description=DESCRIPTION,

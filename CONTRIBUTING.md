@@ -4,17 +4,17 @@ Thank you for your interest in contributing to CatLLM! This document provides gu
 
 ## Reporting Issues
 
-If you encounter a bug, unexpected behavior, or have a feature request, please [open an issue on GitHub](https://github.com/chrissoria/cat-llm/issues). When reporting a bug, include:
+If you encounter a bug, unexpected behavior, or have a feature request, please [open an issue on GitHub](https://github.com/chrissoria/cat-ademic/issues). When reporting a bug, include:
 
 - A clear description of the problem
 - Steps to reproduce the issue
-- Your Python version and `cat-llm` version (`pip show cat-llm`)
+- Your Python version and `cat-ademic` version (`pip show cat-ademic`)
 - The provider and model you were using (e.g., OpenAI GPT-4o)
 - The full error traceback, if applicable
 
 ## Seeking Support
 
-- **Usage questions**: Open a [GitHub Discussion](https://github.com/chrissoria/cat-llm/discussions) or [Issue](https://github.com/chrissoria/cat-llm/issues) describing what you're trying to do
+- **Usage questions**: Open a [GitHub Discussion](https://github.com/chrissoria/cat-ademic/discussions) or [Issue](https://github.com/chrissoria/cat-ademic/issues) describing what you're trying to do
 - **Documentation gaps**: If something is unclear in the README or examples, open an issue so we can improve it
 - **Research collaboration**: For academic collaboration inquiries, email [ChrisSoria@Berkeley.edu](mailto:ChrisSoria@Berkeley.edu)
 
@@ -25,8 +25,8 @@ If you encounter a bug, unexpected behavior, or have a feature request, please [
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/<your-username>/cat-llm.git
-   cd cat-llm
+   git clone https://github.com/<your-username>/cat-ademic.git
+   cd cat-ademic
    ```
 3. Install the package in development mode:
    ```bash
@@ -50,7 +50,7 @@ If you encounter a bug, unexpected behavior, or have a feature request, please [
    ```bash
    git push origin your-feature-name
    ```
-2. Open a pull request against the `main` branch of [chrissoria/cat-llm](https://github.com/chrissoria/cat-llm)
+2. Open a pull request against the `main` branch of [chrissoria/cat-ademic](https://github.com/chrissoria/cat-ademic)
 3. Describe what your PR does and why, linking any related issues
 4. A maintainer will review your PR and may request changes
 

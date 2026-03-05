@@ -1,49 +1,41 @@
-![catllm Logo](https://github.com/chrissoria/cat-llm/blob/main/images/logo.png?raw=True)
+![cat-ademic Logo](https://github.com/chrissoria/cat-ademic/blob/main/images/logo.png?raw=True)
 
-# cat-llm
+# cat-ademic
 
-CatLLM: A Reproducible LLM Pipeline for Coding Open-Ended Survey Responses
+LLM-powered category analysis for academic paper abstracts via OpenAlex.
 
-[![PyPI - Version](https://img.shields.io/pypi/v/cat-llm.svg)](https://pypi.org/project/cat-llm)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cat-llm.svg)](https://pypi.org/project/cat-llm)
+[![PyPI - Version](https://img.shields.io/pypi/v/cat-ademic.svg)](https://pypi.org/project/cat-ademic)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cat-ademic.svg)](https://pypi.org/project/cat-ademic)
 
 -----
 
 ## The Problem
 
-If you work with open-ended survey data, you know the pain: hundreds or thousands of free-text responses that need to be categorized before you can do any quantitative analysis. The traditional approach is manual coding—either doing it yourself or hiring research assistants. It's slow, expensive, and doesn't scale.
+If you study a research field, you know the challenge: hundreds of papers need to be characterized before you can map what a journal publishes, how methods are evolving, or where the gaps are. Manual reading doesn't scale. Keyword search misses nuance.
 
 ## The Solution
 
-CatLLM is a Python package designed specifically for survey research that uses LLMs to automate the categorization of open-ended responses. It handles both:
+cat-ademic fetches paper abstracts directly from [OpenAlex](https://openalex.org/) and uses LLMs to classify, extract, and explore categories across them. It handles:
 
-- **Category Assignment**: Classify responses into your predefined categories (multi-label supported)
-- **Category Extraction**: Automatically discover and extract categories from your data when you don't have a predefined scheme
-- **Category Exploration**: Analyze category stability and saturation through repeated raw extraction
+- **Category Assignment** (`classify`): Classify papers into your predefined categories (multi-label supported)
+- **Category Extraction** (`extract`): Automatically discover and extract categories from abstracts when you don't have a predefined scheme
+- **Category Exploration** (`explore`): Analyze category stability and saturation through repeated raw extraction
 
-With leading models like GPT-5, Gemini, and Qwen 3, CatLLM achieves **98% accuracy compared to human consensus** on classification tasks.
-
-**Try the web app:** [https://huggingface.co/spaces/CatLLM/survey-classifier](https://huggingface.co/spaces/CatLLM/survey-classifier)
+No manual downloading. Point it at a journal ISSN (or OpenAlex topic), set a date range, and get back a structured CSV.
 
 -----
 
 ## Table of Contents
 
 - [Installation](#installation)
-  - [R Package](#r-package)
 - [Quick Start](#quick-start)
 - [Best Practices for Classification](#best-practices-for-classification)
 - [Configuration](#configuration)
 - [Supported Models](#supported-models)
 - [API Reference](#api-reference)
-  - [classify()](#classify) - Unified function for text, image, and PDF (auto-detects input type)
-  - [extract()](#extract) - Unified function for category extraction
-  - [explore()](#explore) - Raw category extraction for saturation analysis
-  - [summarize()](#summarize) - Unified function for text and PDF summarization
-  - [image_score_drawing()](#image_score_drawing)
-  - [image_features()](#image_features)
-  - [cerad_drawn_score()](#cerad_drawn_score)
-- [Deprecated Functions](#deprecated-functions)
+  - [classify()](#classify)
+  - [extract()](#extract)
+  - [explore()](#explore)
 - [Related Projects](#related-projects)
 - [Academic Research](#academic-research)
 - [Contributing & Support](#contributing--support)
@@ -52,71 +44,77 @@ With leading models like GPT-5, Gemini, and Qwen 3, CatLLM achieves **98% accura
 ## Installation
 
 ```console
-pip install cat-llm
+pip install cat-ademic
 ```
-
-For PDF support:
-```console
-pip install cat-llm[pdf]
-```
-
-> **Note:** Web data collection (`build_dataset_from_web`) has been moved to its own package due to its different focus. Install it separately:
-> ```console
-> pip install llm-web-research
-> ```
-> See [llm-web-research](https://github.com/chrissoria/llm-web-research) for details.
-
-### R Package
-
-An R wrapper is available for users who prefer R over Python. It uses [reticulate](https://rstudio.github.io/reticulate/) to call the Python package under the hood.
-
-```r
-# Install from GitHub
-devtools::install_github("chrissoria/cat-llm", subdir = "r-package/catllm")
-
-# Install the Python backend (one-time setup)
-catllm::install_catllm()
-```
-
-All three core functions — `classify()`, `extract()`, and `explore()` — are available with native R syntax. See the [R package README](r-package/catllm/README.md) for full documentation and examples.
 
 -----
 
 ## Quick Start
 
-**This package is designed for building datasets at scale**, not one-off queries. While you can categorize individual responses, its primary purpose is batch processing entire survey columns or image collections into structured research datasets.
+```python
+import catademic as cat
+from dotenv import load_dotenv
+import os
 
-Simply provide your survey responses and category list—the package handles the rest and outputs clean data ready for statistical analysis. It works with single or multiple categories per response and automatically skips missing data to save API costs.
+load_dotenv()
+api_key = os.environ["OPENAI_API_KEY"]
 
-Also supports **image and PDF classification** using the same methodology: extract features, count objects, identify categories, or determine presence of elements based on your research questions.
+# Classify 250 recent papers from Social Science Computer Review
+results = cat.classify(
+    categories=[
+        "Introduces new computational tool or method",
+        "Applies LLM/AI to social science data",
+        "Evaluates or benchmarks a method",
+        "Improves survey or data collection",
+        "Theory-driven / conceptual",
+        "Other",
+    ],
+    journal_issn="0894-4393",
+    paper_limit=250,
+    date_from="2023-01-01",
+    description="Academic papers from Social Science Computer Review",
+    api_key=api_key,
+    filename="out/sscr_classified.csv",
+)
 
-All outputs are formatted for immediate statistical analysis and can be exported directly to CSV.
+print(results.head(10))
+```
 
-*Not to be confused with CAT-LLM for Chinese article‐style transfer ([Tao et al. 2024](https://arxiv.org/html/2401.05707v1)).*
+```python
+# Discover emergent categories without a predefined scheme
+raw_categories = cat.explore(
+    journal_issn="0894-4393",
+    paper_limit=250,
+    date_from="2023-01-01",
+    description="Academic papers from Social Science Computer Review",
+    api_key=api_key,
+    filename="out/sscr_categories_raw.csv",
+)
 
+print(f"Total raw category strings extracted: {len(raw_categories)}")
+```
 
+-----
 
 ## Best Practices for Classification
 
-These recommendations are based on empirical testing across 4 surveys, 4 models (7B to frontier-class), and 250-row subsamples compared against human-coded ground truth.
+These recommendations are based on empirical testing across multiple datasets and models (7B to frontier-class).
 
 ### What works
 
-- **Detailed category descriptions**: The single biggest lever for accuracy. Instead of short labels like `"Job change"`, use verbose descriptions like `"The person had a job or school or career change, including transferred and retired."` This consistently improves accuracy across all models by several percentage points.
-- **Include an "Other" category**: Adding a catch-all category like `"Other: The response does not fit any of the above categories."` prevents the model from forcing ambiguous responses into ill-fitting categories, improving precision.
-- **Few-shot examples** (`example1`–`example6`): Providing 2–4 labeled examples can help, particularly for weaker models. Effects are modest (+0–1 pp on average) and model-dependent.
-- **Low temperature** (`creativity=0`): For classification tasks, deterministic output is generally preferable. Higher temperatures introduce noise without improving accuracy.
+- **Detailed category descriptions**: The single biggest lever for accuracy. Instead of short labels like `"Methods paper"`, use verbose descriptions like `"Introduces a new computational tool or method, including software packages, algorithms, or pipelines."` This consistently improves accuracy across all models.
+- **Include an "Other" category**: Adding a catch-all category prevents the model from forcing ambiguous papers into ill-fitting categories.
+- **Low temperature** (`creativity=0`): For classification tasks, deterministic output is generally preferable.
 
 ### What doesn't help (or hurts)
 
-- **Chain of Thought** (`chain_of_thought`): In our testing, enabling COT did not improve classification accuracy for any model and slightly degraded it for some. It is now off by default.
-- **Chain of Verification** (`chain_of_verification`): CoVE uses ~4x the API calls per response for a self-verification loop. Despite the added cost, it consistently reduced accuracy by 1–2 percentage points, primarily by retracting correct classifications during the verification step. Not recommended for classification tasks.
-- **Step-back prompting** (`step_back_prompt`): Results were inconsistent — slight gains for weaker models (~+1.8 pp) but slight losses for stronger models (~-0.5 pp), with high variance across surveys. Not recommended as a default strategy.
-- **Context prompting** (`context_prompt`): Adds generic expert context to the prompt. No consistent benefit observed.
+- **Chain of Thought** (`chain_of_thought`): Does not reliably improve classification accuracy and adds cost.
+- **Chain of Verification** (`chain_of_verification`): Uses ~4x the API calls. Tends to retract correct classifications during the verification step. Not recommended.
+- **Step-back prompting** (`step_back_prompt`): Inconsistent results across datasets. Not recommended as a default.
 
 ### Summary
 
-The most effective approach is straightforward: **write detailed category descriptions, include an "Other" category, and use a capable model at low temperature.** Advanced prompting strategies add complexity and cost without reliable gains for classification tasks.
+The most effective approach is: **write detailed category descriptions, include an "Other" category, and use a capable model at low temperature.**
 
 -----
 
@@ -134,7 +132,7 @@ Get an API key from your preferred provider:
 - **Mistral**: [console.mistral.ai](https://console.mistral.ai)
 - **Perplexity**: [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api)
 
-Most providers require adding a payment method and purchasing credits. Store your key securely and never share it publicly.
+OpenAlex is unauthenticated and requires no key. Providing a `polite_email` in your requests is recommended for higher rate limits.
 
 ## Supported Models
 
@@ -143,139 +141,94 @@ Most providers require adding a payment method and purchasing credits. Store you
 - **Google**: Gemini 2.5 Flash, Gemini 2.5 Pro, etc.
 - **Huggingface**: Qwen, Llama 4, DeepSeek, and thousands of community models
 - **xAI**: Grok models
-- **Mistral**: Mistral Large, Pixtral, etc.
+- **Mistral**: Mistral Large, etc.
 - **Perplexity**: Sonar Large, Sonar Small, etc.
 
-**Fully Tested:**
-- OpenAI (GPT-4, GPT-4o, GPT-5, etc.)
-- Anthropic (Claude Sonnet 4, Claude 3.5 Sonnet, Haiku)
-- Perplexity (Sonar models)
-- Google Gemini - Free tier has severe rate limits (5 RPM). Requires Google AI Studio billing account for large-scale use.
-- Huggingface - Access to Qwen, Llama 4, DeepSeek, and thousands of user-trained models for specific tasks. API routing can occasionally be unstable.
-- xAI (Grok models)
-- Mistral (Mistral Large, Pixtral, etc.)
+**Note:** For best results, start with OpenAI or Anthropic.
 
-**Note:** For best results, I recommend starting with OpenAI or Anthropic.
-
+-----
 
 ## API Reference
 
 ### `classify()`
 
-Unified classification function for text, image, and PDF inputs. **Input type is auto-detected** from your data—no need to specify whether you're classifying text, images, or PDFs.
-
-Supports both **single-model** and **multi-model ensemble** classification for improved accuracy through consensus voting.
+Classify academic paper abstracts into predefined categories. Abstracts are fetched automatically from OpenAlex when you provide a `journal_issn` or `topic_id`.
 
 **Parameters:**
-- `input_data`: The data to classify. Can be:
-  - Text: list of strings or pandas Series
-  - Images: directory path, single file, or list of image paths
-  - PDFs: directory path, single file, or list of PDF paths
-- `categories` (list): List of category names for classification
-- `api_key` (str): API key for the LLM service (single-model mode)
-- `description` (str): Description of the input data context
+- `categories` (list): List of category descriptions for classification
+- `journal_issn` (str): Journal ISSN to pull abstracts from via OpenAlex
+- `journal_name` (str, optional): Journal name for filtering by name instead of ISSN
+- `topic_id` (str, optional): OpenAlex topic ID to pull papers by research topic
+- `topic_name` (str, optional): OpenAlex topic name to pull papers by research topic
+- `paper_limit` (int, default=50): Number of papers to fetch
+- `date_from` (str, optional): Start date filter as `"YYYY-MM-DD"`
+- `date_to` (str, optional): End date filter as `"YYYY-MM-DD"`
+- `polite_email` (str, optional): Email for OpenAlex polite pool (higher rate limits)
+- `api_key` (str): API key for the LLM service
+- `description` (str): Description of the corpus context
 - `user_model` (str, default="gpt-4o"): Model to use
-- `mode` (str, default="image"): PDF processing mode - "image", "text", or "both"
-- `creativity` (float, optional): Temperature setting (0.0-1.0)
+- `model_source` (str, default="auto"): Provider — "auto", "openai", "anthropic", "google", "mistral", "perplexity", "huggingface", "xai"
+- `creativity` (float, optional): Temperature setting (0.0–1.0)
 - `chain_of_thought` (bool, default=False): Enable step-by-step reasoning
-- `filename` (str, optional): Output filename for CSV
+- `filename` (str, optional): Output CSV filename
 - `save_directory` (str, optional): Directory to save results
-- `model_source` (str, default="auto"): Provider - "auto", "openai", "anthropic", "google", "mistral", "perplexity", "huggingface", "xai"
-- `models` (list, optional): For multi-model ensemble, list of `(model, provider, api_key)` or `(model, provider, api_key, config_dict)` tuples
-- `consensus_threshold` (float, default=0.5): Agreement threshold for ensemble mode (0-1)
-- `batch_mode` (bool, default=False): *(Experimental)* Submit the entire job as an async batch request instead of making synchronous calls. Supported providers: OpenAI, Anthropic, Google, Mistral, xAI. Reduces API costs by ~50% at these providers. Not compatible with multi-model ensemble or image/PDF inputs. The function blocks until the batch completes.
-- `batch_poll_interval` (float, default=30.0): Seconds between status polls when `batch_mode=True`.
-- `batch_timeout` (float, default=86400.0): Maximum seconds to wait for a batch job before raising `BatchJobExpiredError`.
-- `thinking_budget` (int, default=0): Token budget for model reasoning/thinking. Set to 0 to disable. Behavior varies by provider:
-
-| Provider | `thinking_budget=0` | `thinking_budget > 0` (e.g., 8192) |
-|----------|---------------------|--------------------------------------|
-| **OpenAI** | `reasoning_effort="minimal"` | `reasoning_effort="high"` |
-| **Anthropic** | Thinking disabled | Extended thinking enabled (min 1024 tokens, forces temperature=1) |
-| **Google** | Thinking disabled | `thinkingConfig: {thinkingBudget: N}` (min 128 tokens) |
-| **HuggingFace** | Thinking disabled (or use non-thinking model variant) | Thinking enabled (or use thinking model variant) |
-
-> **Note:** Mistral and xAI models do not have reasoning/thinking toggles — `thinking_budget` has no effect on these providers. For Qwen3 on HuggingFace, reasoning is controlled by choosing the model variant: use `Qwen3-VL-235B-A22B-Thinking` for reasoning or `Qwen3-VL-235B-A22B-Instruct` for standard mode with `thinking_budget=0`.
 
 **Returns:**
-- `pandas.DataFrame`: Classification results with category columns
+- `pandas.DataFrame`: Results with one binary column per category (`category_1`, `category_2`, …), plus `title`, `doi`, `publication_date`, `cited_by_count`
 
-**Examples:**
+**Example:**
 
 ```python
-import catllm as cat
+import catademic as cat
 
-# Text classification (auto-detected)
 results = cat.classify(
-    input_data=df['responses'],
-    categories=["Positive feedback", "Negative feedback", "Neutral"],
-    description="Customer satisfaction survey",
-    api_key=api_key
-)
-
-# Image classification (auto-detected from file paths)
-results = cat.classify(
-    input_data="/path/to/images/",
-    categories=["Contains person", "Outdoor scene", "Has text"],
-    description="Product photos",
-    api_key=api_key
-)
-
-# PDF classification (auto-detected, processes each page separately)
-results = cat.classify(
-    input_data="/path/to/reports/",
-    categories=["Contains table", "Has chart", "Is summary page"],
-    description="Financial reports",
-    mode="both",  # Use both image and extracted text
-    api_key=api_key
-)
-
-# Multi-model ensemble for higher accuracy
-results = cat.classify(
-    input_data=df['responses'],
-    categories=["Positive", "Negative", "Neutral"],
-    models=[
-        ("gpt-4o", "openai", "sk-..."),
-        ("claude-sonnet-4-5-20250929", "anthropic", "sk-ant-..."),
-        ("gemini-2.5-flash", "google", "AIza..."),
+    categories=[
+        "Introduces new computational tool or method",
+        "Applies LLM/AI to social science data",
+        "Theory-driven / conceptual",
+        "Other",
     ],
-    consensus_threshold=0.5,  # Majority vote
+    journal_issn="0894-4393",
+    paper_limit=100,
+    date_from="2023-01-01",
+    description="Social Science Computer Review papers",
+    api_key=api_key,
+    filename="sscr_classified.csv",
 )
+
+# Add readable column names
+results["new_tool"] = results["category_1"]
+results["applies_ai"] = results["category_2"]
+results.to_csv("sscr_classified.csv", index=False)
 ```
-
-**Multi-Model Ensemble:**
-
-When you provide the `models` parameter, CatLLM runs classification across multiple models in parallel and combines results using majority voting. This can significantly improve accuracy by reducing individual model biases.
-
-The output includes:
-- Individual model predictions (e.g., `category_1_gpt_4o`, `category_1_claude`)
-- Consensus columns (e.g., `category_1_consensus`)
-- Agreement scores showing how many models agreed
 
 ---
 
 ### `extract()`
 
-Unified category extraction function for text, image, and PDF inputs. Automatically discovers categories in your data when you don't have a predefined scheme.
-
-> **Planned improvement:** Allow specifying a separate, more powerful model for the semantic merge step (e.g., use GPT-4o-mini for bulk extraction, GPT-4o for the final consolidation). This "tiered" approach could improve merge quality without significantly increasing cost.
+Automatically discover and extract categories from paper abstracts when you don't have a predefined scheme. Returns a clean, deduplicated, semantically merged set of categories.
 
 **Parameters:**
-- `input_data`: The data to explore (text list, image paths, or PDF paths)
+- `journal_issn` (str): Journal ISSN to pull abstracts from via OpenAlex
+- `journal_name` (str, optional): Journal name for filtering
+- `topic_id` (str, optional): OpenAlex topic ID
+- `topic_name` (str, optional): OpenAlex topic name
+- `paper_limit` (int, default=50): Number of papers to fetch
+- `date_from` (str, optional): Start date filter as `"YYYY-MM-DD"`
+- `date_to` (str, optional): End date filter as `"YYYY-MM-DD"`
+- `polite_email` (str, optional): Email for OpenAlex polite pool
 - `api_key` (str): API key for the LLM service
-- `input_type` (str, default="text"): Type of input - "text", "image", or "pdf"
-- `description` (str): Description of the input data
+- `description` (str): Description of the corpus
 - `max_categories` (int, default=12): Maximum number of categories to return
 - `categories_per_chunk` (int, default=10): Categories to extract per chunk
 - `divisions` (int, default=12): Number of chunks to divide data into
 - `iterations` (int, default=8): Number of extraction passes over the data
 - `user_model` (str, default="gpt-4o"): Model to use
-- `specificity` (str, default="broad"): "broad" or "specific" category granularity
+- `specificity` (str, default="broad"): `"broad"` or `"specific"` category granularity
 - `research_question` (str, optional): Research context to guide extraction
-- `focus` (str, optional): Focus instruction for category extraction (e.g., "emotional responses")
-- `filename` (str, optional): Output filename for CSV
-
-> **Default parameter rationale:** The defaults of `divisions=12` and `iterations=8` were determined through empirical analysis. We ran a 6x6 grid search over [1, 4, 8, 12, 16, 20] for both parameters, repeating each combination 10 times and measuring pairwise Jaro-Winkler consistency across runs. Consistency peaked at 12 divisions and 8 iterations, with values beyond this point offering no meaningful improvement.
+- `focus` (str, optional): Focus instruction (e.g., `"methodological contributions"`)
+- `filename` (str, optional): Output CSV filename
+- `model_source` (str, default="auto"): Provider
 
 **Returns:**
 - `dict` with keys:
@@ -286,43 +239,51 @@ Unified category extraction function for text, image, and PDF inputs. Automatica
 **Example:**
 
 ```python
-import catllm as cat
+import catademic as cat
 
-# Extract categories from survey responses
 results = cat.extract(
-    input_data=df['responses'],
-    description="Why did you move?",
+    journal_issn="0894-4393",
+    paper_limit=250,
+    date_from="2023-01-01",
+    description="Social Science Computer Review papers",
     api_key=api_key,
     max_categories=10,
-    focus="decisions to relocate"  # Optional focus
+    focus="methodological contributions",
 )
 
-print(results['top_categories'])
-# ['Employment opportunity', 'Family reasons', 'Cost of living', ...]
+print(results["top_categories"])
+# ['Computational text analysis', 'Survey methodology', 'Network analysis', ...]
 ```
 
 ---
 
 ### `explore()`
 
-Raw category extraction for frequency and saturation analysis. Unlike `extract()`, which normalizes, deduplicates, and semantically merges categories into a clean final set, `explore()` returns **every category string from every chunk across every iteration** — with duplicates intact.
+Raw category extraction for frequency and saturation analysis. Unlike `extract()`, which normalizes and merges categories into a clean final set, `explore()` returns **every category string from every chunk across every iteration** — with duplicates intact.
 
-This is useful for analyzing which categories are robust (consistently discovered across runs) versus which are noise (appearing only once or twice). By increasing iterations, you can build saturation curves showing when category discovery converges.
+This is useful for analyzing which categories are robust (consistently discovered across runs) versus noise (appearing only once or twice). Increasing `iterations` lets you build saturation curves showing when category discovery converges.
 
 **Parameters:**
-- `input_data`: List of text responses or pandas Series
+- `journal_issn` (str): Journal ISSN to pull abstracts from via OpenAlex
+- `journal_name` (str, optional): Journal name for filtering
+- `topic_id` (str, optional): OpenAlex topic ID
+- `topic_name` (str, optional): OpenAlex topic name
+- `paper_limit` (int, default=50): Number of papers to fetch
+- `date_from` (str, optional): Start date filter as `"YYYY-MM-DD"`
+- `date_to` (str, optional): End date filter as `"YYYY-MM-DD"`
+- `polite_email` (str, optional): Email for OpenAlex polite pool
 - `api_key` (str): API key for the LLM service
-- `description` (str): The survey question or description of the data
+- `description` (str): Description of the corpus
 - `categories_per_chunk` (int, default=10): Categories to extract per chunk
 - `divisions` (int, default=12): Number of chunks to divide data into
-- `user_model` (str, default="gpt-4o"): Model to use
-- `creativity` (float, optional): Temperature setting (0.0-1.0)
-- `specificity` (str, default="broad"): "broad" or "specific" category granularity
-- `research_question` (str, optional): Research context to guide extraction
-- `focus` (str, optional): Focus instruction (e.g., "decisions to relocate")
 - `iterations` (int, default=8): Number of passes over the data
+- `user_model` (str, default="gpt-4o"): Model to use
+- `specificity` (str, default="broad"): `"broad"` or `"specific"` category granularity
+- `research_question` (str, optional): Research context to guide extraction
+- `focus` (str, optional): Focus instruction for extraction
 - `random_state` (int, optional): Random seed for reproducibility
 - `filename` (str, optional): Output CSV filename (one category per row)
+- `model_source` (str, default="auto"): Provider
 
 **Returns:**
 - `list[str]`: Every category extracted from every chunk across every iteration. Length ≈ `iterations × divisions × categories_per_chunk`.
@@ -330,261 +291,42 @@ This is useful for analyzing which categories are robust (consistently discovere
 **Example:**
 
 ```python
-import catllm as cat
+import catademic as cat
+from collections import Counter
 
-# Run extraction with many iterations for saturation analysis
 raw_categories = cat.explore(
-    input_data=df['responses'],
-    description="Why did you move?",
+    journal_issn="0894-4393",
+    paper_limit=250,
+    date_from="2023-01-01",
+    description="Social Science Computer Review papers",
     api_key=api_key,
     iterations=20,
-    divisions=5,
-    categories_per_chunk=10,
+    filename="sscr_categories_raw.csv",
 )
 
-# Count how often each category appears across runs
-from collections import Counter
 counts = Counter(raw_categories)
 for category, freq in counts.most_common(15):
     print(f"{freq:3d}x  {category}")
 ```
 
----
-
-### `summarize()`
-
-Unified summarization function for text and PDF inputs. Generates concise summaries of survey responses, documents, or any text data. **Input type is auto-detected** from your data.
-
-Supports both **single-model** and **multi-model ensemble** summarization. In multi-model mode, summaries from all models are synthesized into a consensus summary.
-
-**Parameters:**
-- `input_data`: The data to summarize. Can be:
-  - Text: list of strings, pandas Series, or single string
-  - PDF: directory path, single PDF path, or list of PDF paths
-- `api_key` (str): API key for the LLM service (single-model mode)
-- `description` (str): Description of what the content contains (provides context)
-- `instructions` (str): Specific summarization instructions (e.g., "bullet points")
-- `max_length` (int): Maximum summary length in words
-- `focus` (str): What to focus on (e.g., "main arguments", "emotional content")
-- `user_model` (str, default="gpt-4o"): Model to use
-- `model_source` (str, default="auto"): Provider - "auto", "openai", "anthropic", "google", etc.
-- `mode` (str, default="image"): PDF processing mode:
-  - "image": Render pages as images (best for visual documents)
-  - "text": Extract text only (faster, good for text-heavy PDFs)
-  - "both": Send both image and extracted text (most comprehensive)
-- `filename` (str): Output CSV filename
-- `save_directory` (str): Directory to save results
-- `models` (list): For multi-model mode, list of `(model, provider, api_key)` tuples
-
-**Returns:**
-- `pandas.DataFrame`: Results with summary columns:
-  - `survey_input`: Original text or page label (for PDFs)
-  - `summary`: Generated summary (or consensus for multi-model)
-  - `processing_status`: "success", "error", "skipped"
-  - `pdf_path`: Path to source PDF (PDF mode only)
-  - `page_index`: Page number, 0-indexed (PDF mode only)
-
-**Examples:**
-
-```python
-import catllm as cat
-
-# Single model text summarization
-results = cat.summarize(
-    input_data=df['responses'],
-    description="Customer feedback",
-    api_key=api_key
-)
-
-# PDF summarization (auto-detected from file paths)
-results = cat.summarize(
-    input_data="/path/to/pdfs/",
-    description="Research papers",
-    mode="image",
-    api_key=api_key
-)
-
-# PDF summarization with specific files and focus
-results = cat.summarize(
-    input_data=["doc1.pdf", "doc2.pdf"],
-    description="Financial reports",
-    mode="both",
-    focus="key metrics and trends",
-    max_length=100,
-    api_key=api_key
-)
-
-# Multi-model with synthesis
-results = cat.summarize(
-    input_data=df['responses'],
-    models=[
-        ("gpt-4o", "openai", "sk-..."),
-        ("claude-sonnet-4-5-20250929", "anthropic", "sk-ant-..."),
-    ],
-)
-```
-
----
-
-### `image_score_drawing()`
-
-Performs quality scoring of images against a reference description and optional reference image, returning structured results with optional CSV export.
-
-**Methodology:**
-Processes each image individually, assigning a drawing quality score on a 5-point scale based on similarity to the expected description:
-
-- **1**: No meaningful similarity (fundamentally different)
-- **2**: Barely recognizable similarity (25% match)
-- **3**: Partial match (50% key features)
-- **4**: Strong alignment (75% features)
-- **5**: Near-perfect match (90%+ similarity)
-
-**Parameters:**
-- `reference_image_description` (str): A description of what the model should expect to see
-- `image_input` (list): List of image file paths or folder path containing images
-- `reference_image` (str): A file path to the reference image
-- `api_key` (str): API key for the LLM service
-- `user_model` (str, default="gpt-4o"): Specific vision model to use
-- `creativity` (float, default=0): Temperature/randomness setting (0.0-1.0)
-- `safety` (bool, default=False): Enable safety checks and save results at each API call step
-- `filename` (str, default="image_scores.csv"): Filename for CSV output
-- `save_directory` (str, optional): Directory path to save the CSV file
-- `model_source` (str, default="OpenAI"): Model provider
-
-**Returns:**
-- `pandas.DataFrame`: DataFrame with image paths, quality scores, and analysis details
-
-**Example:**
-
-```python
-import catllm as cat
-
-image_scores = cat.image_score_drawing(
-    reference_image_description='A hand-drawn circle',
-    image_input=['image1.jpg', 'image2.jpg', 'image3.jpg'],
-    user_model="gpt-4o",
-    api_key="OPENAI_API_KEY"
-)
-```
-
----
-
-### `image_features()`
-
-Extracts specific features and attributes from images, returning exact answers to user-defined questions (e.g., counts, colors, presence of objects).
-
-**Methodology:**
-Processes each image individually using vision models to extract precise information about specified features. Unlike scoring and classification functions, this returns factual data such as object counts, color identification, or presence/absence of specific elements.
-
-**Parameters:**
-- `image_description` (str): A description of what the model should expect to see
-- `image_input` (list): List of image file paths or folder path containing images
-- `features_to_extract` (list): List of specific features to extract (e.g., ["number of people", "primary color", "contains text"])
-- `api_key` (str): API key for the LLM service
-- `user_model` (str, default="gpt-4o"): Specific vision model to use
-- `creativity` (float, default=0): Temperature/randomness setting (0.0-1.0)
-- `to_csv` (bool, default=False): Whether to save the output to a CSV file
-- `safety` (bool, default=False): Enable safety checks and save results at each API call step
-- `filename` (str, default="categorized_data.csv"): Filename for CSV output
-- `save_directory` (str, optional): Directory path to save the CSV file
-- `model_source` (str, default="OpenAI"): Model provider
-
-**Returns:**
-- `pandas.DataFrame`: DataFrame with image paths and extracted feature values
-
-**Example:**
-
-```python
-import catllm as cat
-
-features = cat.image_features(
-    image_description='Product photos from e-commerce site',
-    features_to_extract=['number of items', 'primary color', 'has price tag'],
-    image_input='/path/to/images/',
-    user_model="gpt-4o",
-    api_key="OPENAI_API_KEY"
-)
-```
-
----
-
-### `cerad_drawn_score()`
-
-Automatically scores drawings of circles, diamonds, overlapping rectangles, and cubes according to the official Consortium to Establish a Registry for Alzheimer's Disease (CERAD) scoring system.
-
-**Methodology:**
-Processes each image individually, evaluating the drawn shapes based on CERAD criteria. Works even with images that contain other drawings or writing.
-
-**Parameters:**
-- `shape` (str): The type of shape to score ("circle", "diamond", "rectangles", "cube")
-- `image_input` (list): List of image file paths or folder path containing images
-- `api_key` (str): API key for the LLM service
-- `user_model` (str, default="gpt-4o"): Specific model to use
-- `creativity` (float, default=0): Temperature/randomness setting (0.0-1.0)
-- `safety` (bool, default=False): Enable safety checks and save results at each API call step
-- `filename` (str, optional): Filename for CSV output
-- `model_source` (str, default="auto"): Model provider
-
-**Returns:**
-- `pandas.DataFrame`: DataFrame with image paths, CERAD scores, and analysis details
-
-**Example:**
-
-```python
-import catllm as cat
-
-diamond_scores = cat.cerad_drawn_score(
-    shape="diamond",
-    image_input=df['diamond_pic_path'],
-    api_key=api_key,
-    safety=True,
-    filename="diamond_scores.csv",
-)
-```
-
----
-
-## Deprecated Functions
-
-The following functions are deprecated and will be removed in a future version. Please use `classify()` instead, which auto-detects input type and supports all the same features.
-
-| Deprecated Function | Replacement |
-|---------------------|-------------|
-| `multi_class()` | `classify(input_data=texts, ...)` |
-| `image_multi_class()` | `classify(input_data=images, ...)` |
-| `pdf_multi_class()` | `classify(input_data=pdfs, ...)` |
-| `explore_corpus()` | `extract(input_data=texts, ...)` |
-| `explore_common_categories()` | `extract(input_data=texts, ...)` |
-
-These functions still work but will show deprecation warnings. Migration is straightforward—simply use `classify()` with your data and it will automatically detect whether you're passing text, images, or PDFs.
-
----
+-----
 
 ## Related Projects
 
-**Looking for web research capabilities?** Check out [llm-web-research](https://github.com/chrissoria/llm-web-research) - a precision-focused LLM-powered web research tool that uses a novel Funnel of Verification (FoVe) methodology to reduce false positives. It's designed for use cases where accuracy matters more than completeness.
-
-```bash
-pip install llm-web-research
-```
+- **[cat-llm](https://github.com/chrissoria/cat-llm)**: The survey response version of this tool — classifies and extracts categories from open-ended survey responses, images, and PDFs.
+- **[llm-web-research](https://github.com/chrissoria/llm-web-research)**: LLM-powered web research with a Funnel of Verification methodology.
 
 ## Academic Research
 
-This package implements methodology from research on LLM performance in social science applications, including the UC Berkeley Social Networks Study. The package addresses reproducibility challenges in LLM-assisted research by providing standardized interfaces and consistent output formatting.
-
 If you use this package for research, please cite:
 
-Soria, C. (2025). CatLLM (0.1.0). Zenodo. https://doi.org/10.5281/zenodo.15532317
+Soria, C. (2025). cat-ademic (0.1.0). GitHub. https://github.com/chrissoria/cat-ademic
 
 ## Contributing & Support
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
-
-- **Report bugs or request features**: [Open a GitHub Issue](https://github.com/chrissoria/cat-llm/issues)
-- **Ask questions or get help**: [GitHub Discussions](https://github.com/chrissoria/cat-llm/discussions) or [Issues](https://github.com/chrissoria/cat-llm/issues)
-- **Contribute code**: Fork the repo, create a branch, and submit a pull request — see [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Report bugs or request features**: [Open a GitHub Issue](https://github.com/chrissoria/cat-ademic/issues)
 - **Research collaboration**: Email [ChrisSoria@Berkeley.edu](mailto:ChrisSoria@Berkeley.edu)
 
 ## License
 
-`cat-llm` is distributed under the terms of the [GNU](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
+`cat-ademic` is distributed under the terms of the [GNU GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) license.

@@ -144,6 +144,10 @@ def classify(
     if academic_context:
         description = f"{academic_context}\n{description}".strip() if description else academic_context
 
+    # Remove keys we set explicitly to avoid "multiple values" if caller also passes them
+    kwargs.pop("add_other", None)
+    kwargs.pop("check_verbosity", None)
+
     # When using academic source, suppress internal save so we can attach metadata first
     _academic = _papers_df is not None
     result = cat_stack.classify(

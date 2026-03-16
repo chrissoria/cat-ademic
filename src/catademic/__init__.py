@@ -12,29 +12,29 @@ from .__about__ import (
 )
 
 # =============================================================================
-# Public API - Organized by function type
+# Public API — catademic entry points (thin wrappers around cat_stack)
 # =============================================================================
-
-# Main entry points
+from .classify import classify
 from .extract import extract
 from .explore import explore
-from .classify import classify
 from .summarize import summarize
 
-# Category analysis
-from ._category_analysis import has_other_category, check_category_verbosity
-
 # =============================================================================
-# Academic data source
+# Academic data source (catademic-specific)
 # =============================================================================
 from ._academic import fetch_academic_papers, find_journal, find_journals_by_field, find_topic, SUPPORTED_SOURCES
 
 # =============================================================================
-# Provider utilities (for advanced users)
+# Re-exports from cat_stack (backward compatibility + provider utilities)
 # =============================================================================
-from ._batch import BatchJobExpiredError, BatchJobFailedError
-
-from ._providers import (
+from cat_stack import (
+    # Category analysis
+    has_other_category,
+    check_category_verbosity,
+    # Batch exceptions
+    BatchJobExpiredError,
+    BatchJobFailedError,
+    # Provider utilities
     UnifiedLLMClient,
     detect_provider,
     set_ollama_endpoint,
@@ -43,72 +43,44 @@ from ._providers import (
     check_ollama_model,
     pull_ollama_model,
     PROVIDER_CONFIG,
-)
-
-# =============================================================================
-# Backward compatibility - Deprecated functions
-# These are kept for backward compatibility but users should migrate to the
-# new unified API (extract, classify, summarize)
-# =============================================================================
-
-# Extraction functions (use extract() instead)
-from .extract import (
+    # Deprecated backward-compat functions
     explore_common_categories,
     explore_corpus,
     explore_image_categories,
     explore_pdf_categories,
-)
-
-# Classification functions (use classify() instead)
-from .classify import (
     classify_ensemble,
     multi_class,
     image_multi_class,
     pdf_multi_class,
-)
-
-# Summarization functions (use summarize() instead)
-from .summarize import summarize_ensemble
-
-# =============================================================================
-# Domain-specific functions
-# =============================================================================
-from .CERAD_functions import *
-
-# =============================================================================
-# Additional utilities from existing modules (backward compatibility)
-# =============================================================================
-from .text_functions import (
+    summarize_ensemble,
+    # Utilities
     build_json_schema,
     extract_json,
     validate_classification_json,
-)
-
-from .image_functions import (
     image_score_drawing,
     image_features,
 )
 
 # Define public API
 __all__ = [
-    # Batch mode exceptions
-    "BatchJobExpiredError",
-    "BatchJobFailedError",
+    # Main entry points (catademic wrappers)
+    "classify",
+    "extract",
+    "explore",
+    "summarize",
     # Academic data source
     "fetch_academic_papers",
     "find_journal",
     "find_journals_by_field",
     "find_topic",
     "SUPPORTED_SOURCES",
-    # Main entry points
-    "extract",
-    "explore",
-    "classify",
-    "summarize",
-    # Category analysis
+    # Category analysis (from cat_stack)
     "has_other_category",
     "check_category_verbosity",
-    # Provider utilities
+    # Batch exceptions (from cat_stack)
+    "BatchJobExpiredError",
+    "BatchJobFailedError",
+    # Provider utilities (from cat_stack)
     "UnifiedLLMClient",
     "detect_provider",
     "set_ollama_endpoint",
@@ -117,9 +89,7 @@ __all__ = [
     "check_ollama_model",
     "pull_ollama_model",
     "PROVIDER_CONFIG",
-    # Domain-specific
-    "cerad_drawn_score",
-    # Deprecated (backward compatibility)
+    # Deprecated backward-compat (from cat_stack)
     "explore_common_categories",
     "explore_corpus",
     "explore_image_categories",

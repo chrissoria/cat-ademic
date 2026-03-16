@@ -1,19 +1,17 @@
 """
 Category exploration functions for CatAdemic.
 
-This module provides raw category extraction from text inputs,
-returning unprocessed category lists for frequency/saturation analysis.
+Thin wrapper around cat_stack.explore() that adds academic-specific features:
+- OpenAlex paper fetching (journal_issn, journal_name, journal_field, topic_name/id)
 """
 
-import pandas as pd
+import cat_stack
 
 from ._academic import fetch_academic_papers, SUPPORTED_SOURCES
 
 __all__ = [
     "explore",
 ]
-
-from .text_functions import explore_common_categories
 
 
 def explore(
@@ -30,71 +28,51 @@ def explore(
     date_from: str = None,
     date_to: str = None,
     polite_email: str = None,
-    max_categories=12,
-    categories_per_chunk=10,
-    divisions=12,
-    user_model="gpt-4o",
-    creativity=None,
-    specificity="broad",
-    research_question=None,
-    filename=None,
-    model_source="auto",
-    iterations=8,
-    random_state=None,
-    focus=None,
-    progress_callback=None,
-    chunk_delay: float = 0.0,
+    **kwargs,
 ):
     """
     Explore categories in text data, returning the raw extracted list.
 
     Unlike extract(), which normalizes, deduplicates, and semantically merges
     categories, explore() returns every category string from every chunk across
-    every iteration — with duplicates intact. This is useful for analyzing
-    category stability and saturation across repeated extraction runs.
+    every iteration — with duplicates intact. Useful for saturation analysis.
+
+    Wraps cat_stack.explore() and adds OpenAlex paper fetching.
 
     Args:
         input_data: List of text responses or pandas Series.
             Omit when using journal_issn (abstracts are fetched automatically).
         api_key (str): API key for the model provider.
+        description (str): The survey question or description of the data.
         journal_issn (str): Journal ISSN to pull abstracts from via OpenAlex.
-            When set, input_data is fetched automatically.
+        journal_name (str): Journal name to search for (resolved to ISSN).
+        journal_field (str): Discipline name to pull papers from matching journals.
+        topic_name (str): Filter papers by content topic.
+        topic_id (str): OpenAlex concept ID for exact topic match.
         paper_limit (int): Number of papers to fetch. Default 50.
         date_from (str): Optional start date filter as "YYYY-MM-DD".
         date_to (str): Optional end date filter as "YYYY-MM-DD".
-        description (str): The survey question or description of the data.
-        max_categories (int): Maximum categories per chunk (passed through).
-        categories_per_chunk (int): Categories to extract per chunk.
-        divisions (int): Number of chunks to divide data into.
-        user_model (str): Model name to use. Default "gpt-4o".
-        creativity (float): Temperature setting. None uses model default.
-        specificity (str): "broad" or "specific" category granularity.
-        research_question (str): Optional research context.
-        filename (str): Optional CSV filename to save raw category list.
-        model_source (str): Provider - "auto", "openai", "anthropic", etc.
-        iterations (int): Number of passes over the data.
-        random_state (int): Random seed for reproducibility.
-        focus (str): Optional focus instruction for category extraction.
-        progress_callback (callable): Optional callback for progress updates.
-        chunk_delay (float): Delay in seconds between API calls to avoid rate
-            limits. Default 0.0 (no delay).
+        polite_email (str): Optional email for OpenAlex polite pool.
+        **kwargs: All other parameters passed through to cat_stack.explore()
+            (e.g. max_categories, categories_per_chunk, divisions, user_model,
+            creativity, specificity, iterations, focus, filename, etc.)
 
     Returns:
         list[str]: Every category string extracted from every chunk across
-        every iteration. Length ≈ iterations × divisions × categories_per_chunk.
+        every iteration. Length ~ iterations x divisions x categories_per_chunk.
 
     Examples:
         >>> import catademic as cat
         >>>
         >>> raw_categories = cat.explore(
-        ...     input_data=df['responses'],
-        ...     description="Why did you move?",
+        ...     journal_issn="0894-4393",
+        ...     paper_limit=50,
+        ...     description="Academic papers",
         ...     api_key="your-api-key",
         ...     iterations=3,
         ...     divisions=5,
         ... )
-        >>> print(len(raw_categories))  # ~150
-        >>> print(raw_categories[:5])
+        >>> print(len(raw_categories))
     """
     # Early validation
     if api_key is None:
@@ -102,7 +80,7 @@ def explore(
             "[CatAdemic] api_key is required. Pass api_key='sk-...'."
         )
 
-    # Fetch abstracts from OpenAlex when journal_issn is set
+    # Fetch abstracts from OpenAlex when an academic source is set
     if journal_issn is not None or journal_name is not None or journal_field is not None or topic_name is not None or topic_id is not None:
         if input_data is not None:
             raise ValueError("Pass either input_data or a journal/field source, not both.")
@@ -119,30 +97,9 @@ def explore(
             "Provide either input_data, journal_issn, or journal_name."
         )
 
-    raw_items = explore_common_categories(
-        survey_input=input_data,
+    return cat_stack.explore(
+        input_data=input_data,
         api_key=api_key,
-        survey_question=description,
-        max_categories=max_categories,
-        categories_per_chunk=categories_per_chunk,
-        divisions=divisions,
-        user_model=user_model,
-        creativity=creativity,
-        specificity=specificity,
-        research_question=research_question,
-        filename=None,  # We handle saving ourselves
-        model_source=model_source,
-        iterations=iterations,
-        random_state=random_state,
-        focus=focus,
-        progress_callback=progress_callback,
-        return_raw=True,
-        chunk_delay=chunk_delay,
+        description=description,
+        **kwargs,
     )
-
-    if filename:
-        df = pd.DataFrame(raw_items, columns=["Category"])
-        df.to_csv(filename, index=False)
-        print(f"Raw categories saved to {filename}")
-
-    return raw_items

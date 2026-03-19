@@ -162,11 +162,11 @@ def classify(
         **kwargs,
     )
 
-    # Attach paper metadata and rename survey_input → abstract
+    # Attach paper metadata and rename input_data → abstract
     if _academic:
         result = result.reset_index(drop=True)
-        if "survey_input" in result.columns:
-            result = result.rename(columns={"survey_input": "abstract"})
+        if "input_data" in result.columns:
+            result = result.rename(columns={"input_data": "abstract"})
         meta_cols = [c for c in _papers_df.columns if c != "text"]
         for col in meta_cols:
             result[col] = _papers_df[col].reset_index(drop=True)

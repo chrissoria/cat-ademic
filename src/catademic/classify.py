@@ -1,13 +1,13 @@
 """
 Classification functions for CatAdemic.
 
-Thin wrapper around cat_stack.classify() that adds academic-specific features:
+Thin wrapper around catstack.classify() that adds academic-specific features:
 - OpenAlex paper fetching (journal_issn, journal_name, journal_field, topic_name/id)
 - Academic context injection (journal, field, research_focus, paper_metadata)
 - Post-classification metadata attachment (paper metadata columns)
 """
 
-import cat_stack
+import catstack
 
 from ._academic import fetch_academic_papers, SUPPORTED_SOURCES
 
@@ -58,7 +58,7 @@ def classify(
     """
     Classify text, image, or PDF inputs with academic-specific features.
 
-    Wraps cat_stack.classify() and adds:
+    Wraps catstack.classify() and adds:
     - OpenAlex paper fetching via journal_issn/journal_name/journal_field/topic_name
     - Academic context injection into the classification prompt
     - Post-classification attachment of paper metadata columns
@@ -87,7 +87,7 @@ def classify(
         description (str): Description of the input data context.
         filename (str): Output filename for CSV.
         save_directory (str): Directory to save results.
-        **kwargs: All other parameters passed through to cat_stack.classify()
+        **kwargs: All other parameters passed through to catstack.classify()
             (e.g. user_model, models, creativity, batch_mode, consensus_threshold,
             chain_of_thought, thinking_budget, embeddings, etc.)
 
@@ -150,7 +150,7 @@ def classify(
 
     # When using academic source, suppress internal save so we can attach metadata first
     _academic = _papers_df is not None
-    result = cat_stack.classify(
+    result = catstack.classify(
         input_data=input_data,
         categories=categories,
         api_key=api_key,

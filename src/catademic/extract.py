@@ -1,12 +1,12 @@
 """
 Category extraction functions for CatAdemic.
 
-Thin wrapper around cat_stack.extract() that adds academic-specific features:
+Thin wrapper around catstack.extract() that adds academic-specific features:
 - OpenAlex paper fetching (journal_issn, journal_name, journal_field, topic_name/id)
 - Academic context injection (journal, field, research_focus, paper_metadata)
 """
 
-import cat_stack
+import catstack
 
 from ._academic import fetch_academic_papers, SUPPORTED_SOURCES
 
@@ -54,7 +54,7 @@ def extract(
     """
     Extract/discover categories from text, image, PDF, or academic inputs.
 
-    Wraps cat_stack.extract() and adds:
+    Wraps catstack.extract() and adds:
     - OpenAlex paper fetching via journal_issn/journal_name/journal_field/topic_name
     - Academic context injection into the extraction prompt
 
@@ -79,7 +79,7 @@ def extract(
         research_focus (str): Optional research focus string.
         paper_metadata (dict): Additional context injected into the prompt.
         description (str): Description of the input data.
-        **kwargs: All other parameters passed through to cat_stack.extract()
+        **kwargs: All other parameters passed through to catstack.extract()
             (e.g. input_type, max_categories, categories_per_chunk, divisions,
             user_model, creativity, specificity, iterations, focus, etc.)
 
@@ -129,7 +129,7 @@ def extract(
     if academic_context:
         description = f"{academic_context}\n{description}".strip() if description else academic_context
 
-    return cat_stack.extract(
+    return catstack.extract(
         input_data=input_data,
         api_key=api_key,
         description=description,

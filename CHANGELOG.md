@@ -12,6 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] - 2026-05-11
+
+### Added
+- **`cat_ademic` import alias**: `import cat_ademic` now works alongside the
+  canonical `import catademic`; both resolve to the same module object,
+  aligning the import name with the underscored convention used elsewhere
+  in the cat-* family without breaking existing code.
+
+### Changed
+- **Internal imports** of `cat_stack` rewritten to `catstack`. Now requires
+  `cat-stack>=1.0.19`.
+
+---
+
 ## [3.0.0] - 2026-03-04
 
 ### Changed — Package rename: cat-llm → cat-ademic

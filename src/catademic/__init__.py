@@ -12,7 +12,7 @@ from .__about__ import (
 )
 
 # =============================================================================
-# Public API — catademic entry points (thin wrappers around cat_stack)
+# Public API — catademic entry points (thin wrappers around catstack)
 # =============================================================================
 from .classify import classify
 from .extract import extract
@@ -25,9 +25,9 @@ from .summarize import summarize
 from ._academic import fetch_academic_papers, find_journal, find_journals_by_field, find_topic, SUPPORTED_SOURCES
 
 # =============================================================================
-# Re-exports from cat_stack (backward compatibility + provider utilities)
+# Re-exports from catstack (backward compatibility + provider utilities)
 # =============================================================================
-from cat_stack import (
+from catstack import (
     # Category analysis
     has_other_category,
     check_category_verbosity,
@@ -74,13 +74,13 @@ __all__ = [
     "find_journals_by_field",
     "find_topic",
     "SUPPORTED_SOURCES",
-    # Category analysis (from cat_stack)
+    # Category analysis (from catstack)
     "has_other_category",
     "check_category_verbosity",
-    # Batch exceptions (from cat_stack)
+    # Batch exceptions (from catstack)
     "BatchJobExpiredError",
     "BatchJobFailedError",
-    # Provider utilities (from cat_stack)
+    # Provider utilities (from catstack)
     "UnifiedLLMClient",
     "detect_provider",
     "set_ollama_endpoint",
@@ -89,7 +89,7 @@ __all__ = [
     "check_ollama_model",
     "pull_ollama_model",
     "PROVIDER_CONFIG",
-    # Deprecated backward-compat (from cat_stack)
+    # Deprecated backward-compat (from catstack)
     "explore_common_categories",
     "explore_corpus",
     "explore_image_categories",

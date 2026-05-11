@@ -1,11 +1,11 @@
 """
 Category exploration functions for CatAdemic.
 
-Thin wrapper around cat_stack.explore() that adds academic-specific features:
+Thin wrapper around catstack.explore() that adds academic-specific features:
 - OpenAlex paper fetching (journal_issn, journal_name, journal_field, topic_name/id)
 """
 
-import cat_stack
+import catstack
 
 from ._academic import fetch_academic_papers, SUPPORTED_SOURCES
 
@@ -37,7 +37,7 @@ def explore(
     categories, explore() returns every category string from every chunk across
     every iteration — with duplicates intact. Useful for saturation analysis.
 
-    Wraps cat_stack.explore() and adds OpenAlex paper fetching.
+    Wraps catstack.explore() and adds OpenAlex paper fetching.
 
     Args:
         input_data: List of text responses or pandas Series.
@@ -53,7 +53,7 @@ def explore(
         date_from (str): Optional start date filter as "YYYY-MM-DD".
         date_to (str): Optional end date filter as "YYYY-MM-DD".
         polite_email (str): Optional email for OpenAlex polite pool.
-        **kwargs: All other parameters passed through to cat_stack.explore()
+        **kwargs: All other parameters passed through to catstack.explore()
             (e.g. max_categories, categories_per_chunk, divisions, user_model,
             creativity, specificity, iterations, focus, filename, etc.)
 
@@ -97,7 +97,7 @@ def explore(
             "Provide either input_data, journal_issn, or journal_name."
         )
 
-    return cat_stack.explore(
+    return catstack.explore(
         input_data=input_data,
         api_key=api_key,
         description=description,

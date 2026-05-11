@@ -1,10 +1,10 @@
 """
 Summarization functions for CatAdemic.
 
-Thin wrapper around cat_stack.summarize() — passes through all parameters.
+Thin wrapper around catstack.summarize() — passes through all parameters.
 """
 
-import cat_stack
+import catstack
 
 __all__ = [
     "summarize",
@@ -15,14 +15,14 @@ def summarize(input_data, **kwargs):
     """
     Summarize text or PDF data using LLMs.
 
-    Passes through directly to cat_stack.summarize(). Supports single-model
+    Passes through directly to catstack.summarize(). Supports single-model
     and multi-model (ensemble) summarization with auto-detected input type.
 
     Args:
         input_data: Data to summarize. Can be:
             - Text: list of strings, pandas Series, or single string
             - PDF: directory path, single PDF path, or list of PDF paths
-        **kwargs: All parameters passed through to cat_stack.summarize()
+        **kwargs: All parameters passed through to catstack.summarize()
             (e.g. api_key, description, instructions, max_length, focus,
             user_model, models, mode, creativity, batch_mode, etc.)
 
@@ -38,7 +38,7 @@ def summarize(input_data, **kwargs):
         ...     api_key="your-api-key",
         ... )
     """
-    return cat_stack.summarize(
+    return catstack.summarize(
         input_data=input_data,
         **kwargs,
     )

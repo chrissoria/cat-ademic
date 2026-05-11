@@ -25,7 +25,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "cat-stack>=0.1.0",
+  "cat-stack>=1.0.19",
   "pandas",
   "tqdm",
   "requests",
@@ -50,16 +50,18 @@ extra-dependencies = [
 check = "mypy --install-types --non-interactive {args:src/catademic tests}"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/catademic"]
+packages = ["src/catademic", "src/cat_ademic"]
 include = [
     "src/catademic/**/*.py",
     "src/catademic/images/*",
+    "src/cat_ademic/__init__.py",
 ]
 
 [tool.hatch.build.targets.sdist]
 include = [
     "src/catademic/**/*.py",
     "src/catademic/images/*",
+    "src/cat_ademic/__init__.py",
 ]
 
 [tool.coverage.run]

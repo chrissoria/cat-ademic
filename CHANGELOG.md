@@ -12,6 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.1] - 2026-05-16
+
+### Changed
+- **`extract()` and `explore()`** now pass `domain="academic"` to `catstack.extract()`
+  and `catstack.explore()`, selecting academic-specific prompt templates (uses
+  "papers" language in the semantic merge step). Requires `cat-stack >= 1.0.20`.
+
+---
+
 ## [0.2.0] - 2026-05-11
 
 ### Added

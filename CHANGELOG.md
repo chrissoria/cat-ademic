@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   still get a clear missing-key error from the engine's provider layer.
 
 ### Changed
-- The `cat-stack` dependency floor is raised from `>=1.6.3` to `>=2.5.0`,
+- The `cat-stack` dependency floor is raised from `>=1.6.3` to `>=2.5.1`,
   required for the `collapse_themes` re-export (with `top_n`/`prune`) and
   for `extract()`'s explore -> collapse_themes consolidation engine.
 - `CERAD_functions.py`: Refactored `cerad_drawn_score()` to call `classify()` directly instead of the deprecated `image_multi_class()`. All scoring logic unchanged.

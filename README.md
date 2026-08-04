@@ -173,6 +173,10 @@ Get an API key from your preferred provider:
 
 OpenAlex is unauthenticated and requires no key. Providing a `polite_email` in your requests is recommended for higher rate limits.
 
+### Or use a subscription instead (no API key)
+
+Every function accepts `model_source="claude-agent"` (Claude subscription via the Agent SDK; `pip install "cat-ademic[agent]"`) or `model_source="codex-agent"` (ChatGPT subscription; `pip install "cat-ademic[codex-agent]"`) — leave `api_key` unset. `model_source="claude-code"` (the Claude Code CLI, if installed) needs no extra at all.
+
 ## Supported Models
 
 - **OpenAI**: GPT-4o, GPT-4o-mini, GPT-5, o-series (o1, o3, o4), etc.

@@ -114,12 +114,9 @@ def classify(
         ...     api_key="your-api-key",
         ... )
     """
-    # Early validation
-    if api_key is None and kwargs.get("models") is None:
-        raise ValueError(
-            "[CatAdemic] api_key is required. Pass api_key='sk-...' or use the "
-            "models= parameter for multi-model mode."
-        )
+    # api_key may be None: subscription/CLI backends (claude-code,
+    # claude-agent, codex-agent) and ollama need no key; HTTP providers get
+    # a clear missing-key error from the engine's provider layer.
 
     # Fetch abstracts from OpenAlex when an academic source is set
     _papers_df = None

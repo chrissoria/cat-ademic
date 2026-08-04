@@ -74,11 +74,9 @@ def explore(
         ... )
         >>> print(len(raw_categories))
     """
-    # Early validation
-    if api_key is None:
-        raise ValueError(
-            "[CatAdemic] api_key is required. Pass api_key='sk-...'."
-        )
+    # api_key may be None: subscription/CLI backends (claude-code,
+    # claude-agent, codex-agent) and ollama need no key; HTTP providers get
+    # a clear missing-key error from the engine's provider layer.
 
     # Fetch abstracts from OpenAlex when an academic source is set
     if journal_issn is not None or journal_name is not None or journal_field is not None or topic_name is not None or topic_id is not None:

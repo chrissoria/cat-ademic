@@ -39,6 +39,7 @@ Built on [cat-stack](https://github.com/chrissoria/cat-stack), which provides th
   - [classify()](#classify)
   - [extract()](#extract)
   - [explore()](#explore)
+  - [collapse_themes()](#collapse_themes)
   - [summarize()](#summarize)
   - [Discovery Functions](#discovery-functions)
 - [Multi-Model Ensemble](#multi-model-ensemble)
@@ -429,6 +430,23 @@ counts = Counter(raw_categories)
 for category, freq in counts.most_common(15):
     print(f"{freq:3d}x  {category}")
 ```
+
+---
+
+### `collapse_themes()`
+
+Consolidate the raw label inventory from `explore()` into a smaller, deduplicated taxonomy (re-exported from the shared cat-stack engine). Deterministic pre-cleaning — Jaro-Winkler dedup, embedding merge — runs before any LLM judgment; quality-controlled LLM merge passes follow, with an optional count-guided reduction to the `top_n` most common categories. This is the same consolidation `extract()` runs internally since cat-stack 2.5.0.
+
+```python
+themes = cat.collapse_themes(
+    input_data=raw_categories,   # the explore() output, duplicates intact
+    api_key=api_key,
+    description="Abstracts from social science journals",
+    top_n=12,
+)
+```
+
+See the [cat-stack README](https://github.com/chrissoria/cat-stack#collapse_themes) for the full parameter table (`passes`, `aggressive`, `prune`, per-step model assignment, ...).
 
 ---
 

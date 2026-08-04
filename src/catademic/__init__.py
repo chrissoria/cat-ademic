@@ -19,6 +19,12 @@ from .extract import extract
 from .explore import explore
 from .summarize import summarize
 
+# Semantic consolidation for explore() output, re-exported from the shared
+# cat-stack engine so the discovery workflow (explore -> collapse_themes) is
+# complete without a second import. Its prompts are self-contained (not
+# domain-keyed), so no academic wrapping is needed.
+from catstack import collapse_themes
+
 # =============================================================================
 # Academic data source (catademic-specific)
 # =============================================================================
@@ -67,6 +73,7 @@ __all__ = [
     "classify",
     "extract",
     "explore",
+    "collapse_themes",
     "summarize",
     # Academic data source
     "fetch_academic_papers",
